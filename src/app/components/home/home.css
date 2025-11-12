@@ -1,0 +1,39 @@
+@import '../../../styles/variables';
+@import '../../../styles/mixins';
+
+.home-container {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  background: linear-gradient(135deg, $bg-dark-mode 0%, $bg-dark-mode-secondary 50%, darken($bg-dark-mode, 2%) 100%);
+
+  body.light & {
+    background: linear-gradient(135deg, $bg-light 0%, $bg-dark 50%, lighten($bg-light, 1%) 100%);
+  }
+}
+
+.home-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  margin-left: 280px; /* Larghezza sidebar */
+  transition: margin-left 0.3s $transition-easing-in-out;
+
+  @media (max-width: $breakpoint-lg) {
+    margin-left: 0;
+  }
+}
+
+.home-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: $spacing-6;
+  position: relative;
+}
+
+.content-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
