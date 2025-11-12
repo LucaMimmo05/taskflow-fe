@@ -25,6 +25,50 @@
   padding: $spacing-8;
 }
 
+.register-logo-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: $spacing-6;
+  gap: $spacing-3;
+}
+
+.logo-wrapper {
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.app-logo {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  mix-blend-mode: multiply;
+  
+  body.dark & {
+    mix-blend-mode: screen;
+  }
+}
+
+.app-name {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: $text-primary-dark;
+  margin: 0;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, $color-accent, $color-accent-gradient-end);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+
+  body.light & {
+    color: $text-primary-light;
+  }
+}
+
 .register-title {
   font-size: 1.5rem;
   font-weight: 600;

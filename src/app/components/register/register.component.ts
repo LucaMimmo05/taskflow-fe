@@ -11,6 +11,9 @@ import { CommonModule } from '@angular/common';
 export class RegisterComponent {
   showPassword = false;
   showConfirmPassword = false;
+  
+  // Logo path con timestamp per evitare cache
+  logoPath = `/assets/logo.png?v=${Date.now()}`;
 
   togglePassword(field: 'password' | 'confirmPassword'): void {
     if (field === 'password') {
