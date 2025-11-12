@@ -7,10 +7,10 @@
   align-items: center;
   justify-content: center;
   padding: $spacing-4;
-  background: linear-gradient(to bottom right, $bg-light, $bg-dark);
+  background: linear-gradient(to bottom right, $bg-dark-mode, $bg-dark-mode-secondary);
 
-  body.dark & {
-    background: linear-gradient(to bottom right, $bg-dark-mode, $bg-dark-mode-secondary);
+  body.light & {
+    background: linear-gradient(to bottom right, $bg-light, $bg-dark);
   }
 }
 
@@ -19,47 +19,6 @@
   max-width: 440px;
 }
 
-.register-header {
-  text-align: center;
-  margin-bottom: $spacing-6;
-}
-
-.logo-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: $spacing-3;
-  margin-bottom: $spacing-4;
-}
-
-.logo-gradient {
-  width: 48px;
-  height: 48px;
-  border-radius: $radius-xl;
-  background: linear-gradient(135deg, $color-accent, $color-accent-gradient-end);
-  box-shadow: 0 4px 12px rgba(108, 99, 255, 0.3);
-}
-
-.logo-text {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: $text-primary-light;
-  letter-spacing: -0.02em;
-
-  body.dark & {
-    color: $text-primary-dark;
-  }
-}
-
-.register-subtitle {
-  font-size: 0.875rem;
-  color: $text-secondary-light;
-  margin: 0;
-
-  body.dark & {
-    color: $text-secondary-dark;
-  }
-}
 
 .register-card {
   @include card;
@@ -69,21 +28,21 @@
 .register-title {
   font-size: 1.5rem;
   font-weight: 600;
-  color: $text-primary-light;
+  color: $text-primary-dark;
   margin: 0 0 $spacing-2 0;
 
-  body.dark & {
-    color: $text-primary-dark;
+  body.light & {
+    color: $text-primary-light;
   }
 }
 
 .register-description {
   font-size: 0.875rem;
-  color: $text-secondary-light;
+  color: $text-secondary-dark;
   margin: 0 0 $spacing-6 0;
 
-  body.dark & {
-    color: $text-secondary-dark;
+  body.light & {
+    color: $text-secondary-light;
   }
 }
 
@@ -102,26 +61,33 @@
 .form-label {
   font-size: 0.875rem;
   font-weight: 500;
-  color: $text-primary-light;
+  color: $text-primary-dark;
 
-  body.dark & {
-    color: $text-primary-dark;
+  body.light & {
+    color: $text-primary-light;
   }
+}
+
+.form-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
 }
 
 .form-input {
   width: 100%;
   padding: $spacing-3 $spacing-4;
+  padding-right: 48px; // Spazio per l'icona
   border-radius: $radius-xl;
   @include glass;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   font-size: 0.875rem;
-  color: $text-primary-light;
+  color: $text-primary-dark;
   transition: all $transition-duration-base $transition-easing-in-out;
 
-  body.dark & {
-    border-color: rgba(255, 255, 255, 0.1);
-    color: $text-primary-dark;
+  body.light & {
+    border-color: rgba(255, 255, 255, 0.2);
+    color: $text-primary-light;
   }
 
   &::placeholder {
@@ -135,6 +101,28 @@
 
   &:hover {
     border-color: rgba(108, 99, 255, 0.3);
+  }
+}
+
+.password-toggle {
+  position: absolute;
+  right: $spacing-3;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: $spacing-1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $text-muted;
+  transition: color $transition-duration-base $transition-easing-in-out;
+
+  &:hover {
+    color: $color-accent;
+  }
+
+  svg {
+    display: block;
   }
 }
 
@@ -156,21 +144,21 @@
 .register-footer {
   margin-top: $spacing-6;
   padding-top: $spacing-6;
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
 
-  body.dark & {
-    border-top-color: rgba(255, 255, 255, 0.1);
+  body.light & {
+    border-top-color: rgba(255, 255, 255, 0.2);
   }
 }
 
 .register-footer-text {
   text-align: center;
   font-size: 0.875rem;
-  color: $text-secondary-light;
+  color: $text-secondary-dark;
   margin: 0;
 
-  body.dark & {
-    color: $text-secondary-dark;
+  body.light & {
+    color: $text-secondary-light;
   }
 }
 

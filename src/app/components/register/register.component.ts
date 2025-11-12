@@ -9,6 +9,15 @@ import { CommonModule } from '@angular/common';
   styleUrl: './register.component.scss'
 })
 export class RegisterComponent {
-  // TODO: Aggiungere logica form e validazione
+  showPassword = false;
+  showConfirmPassword = false;
+
+  togglePassword(field: 'password' | 'confirmPassword'): void {
+    if (field === 'password') {
+      this.showPassword = !this.showPassword;
+    } else {
+      this.showConfirmPassword = !this.showConfirmPassword;
+    }
+  }
 }
 

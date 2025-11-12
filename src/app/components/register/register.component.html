@@ -1,33 +1,23 @@
 <div class="register-container">
   <div class="register-wrapper">
-    <!-- Logo/Header -->
-    <div class="register-header">
-      <div class="logo-container">
-        <div class="logo-gradient"></div>
-        <h1 class="logo-text">TASKFLOW</h1>
-      </div>
-      <p class="register-subtitle">Crea il tuo account per iniziare</p>
-    </div>
-
     <!-- Card Registrazione -->
     <div class="register-card">
-      <h2 class="register-title">Crea un account</h2>
-      <p class="register-description">Inizia la tua esperienza con TASKFLOW</p>
+      <h2 class="register-title">Crea il tuo account</h2>
+      <p class="register-description">Inizia a gestire i tuoi progetti</p>
 
       <!-- Form -->
       <form class="register-form">
-        <!-- Display Name -->
+        <!-- Nome -->
         <div class="form-group">
-          <label for="displayName" class="form-label">
-            Nome visualizzato
+          <label for="nome" class="form-label">
+            Nome
           </label>
           <input
-            id="displayName"
+            id="nome"
             type="text"
             class="form-input"
-            placeholder="Mario Rossi"
+            placeholder="Nome"
           />
-          <p class="form-hint">Come vuoi che gli altri ti vedano</p>
         </div>
 
         <!-- Email -->
@@ -39,7 +29,7 @@
             id="email"
             type="email"
             class="form-input"
-            placeholder="mario.rossi@example.com"
+            placeholder="Email"
           />
         </div>
 
@@ -48,13 +38,49 @@
           <label for="password" class="form-label">
             Password
           </label>
-          <input
-            id="password"
-            type="password"
-            class="form-input"
-            placeholder="••••••••"
-          />
-          <p class="form-hint">Minimo 8 caratteri</p>
+          <div class="form-input-wrapper">
+            <input
+              id="password"
+              [type]="showPassword ? 'text' : 'password'"
+              class="form-input"
+              placeholder="Password"
+            />
+            <button type="button" class="password-toggle" (click)="togglePassword('password')">
+              <svg *ngIf="!showPassword" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+              <svg *ngIf="showPassword" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                <line x1="1" y1="1" x2="23" y2="23"></line>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Conferma Password -->
+        <div class="form-group">
+          <label for="confirmPassword" class="form-label">
+            Conferma Password
+          </label>
+          <div class="form-input-wrapper">
+            <input
+              id="confirmPassword"
+              [type]="showConfirmPassword ? 'text' : 'password'"
+              class="form-input"
+              placeholder="Conferma Password"
+            />
+            <button type="button" class="password-toggle" (click)="togglePassword('confirmPassword')">
+              <svg *ngIf="!showConfirmPassword" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+              <svg *ngIf="showConfirmPassword" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                <line x1="1" y1="1" x2="23" y2="23"></line>
+              </svg>
+            </button>
+          </div>
         </div>
 
         <!-- Submit Button -->
@@ -66,8 +92,7 @@
       <!-- Footer -->
       <div class="register-footer">
         <p class="register-footer-text">
-          Hai già un account?
-          <a href="#" class="register-link">Accedi</a>
+          Hai già un account? <a href="#" class="register-link">Accedi</a>
         </p>
       </div>
     </div>

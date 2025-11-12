@@ -1,0 +1,166 @@
+// ============================================
+// CLASSI UTILITY DESIGN SYSTEM
+// ============================================
+
+@import 'variables';
+@import 'mixins';
+
+// Glassmorphism
+.glass {
+  @include glass;
+}
+
+// Card
+.card {
+  @include card;
+}
+
+// Accent Button
+.accent-button {
+  @include accent-button;
+}
+
+// Accent Outline Button
+.accent-outline {
+  @include accent-outline;
+}
+
+// Line Clamp
+.line-clamp-2 {
+  @include line-clamp(2);
+}
+
+.line-clamp-3 {
+  @include line-clamp(3);
+}
+
+// Priority Badges
+.priority-low {
+  background: rgba($priority-low, 0.2);
+  color: lighten($priority-low, 10%);
+
+  .light & {
+    color: $priority-low;
+  }
+}
+
+.priority-medium {
+  background: rgba($priority-medium, 0.2);
+  color: lighten($priority-medium, 10%);
+
+  .light & {
+    color: $priority-medium;
+  }
+}
+
+.priority-high {
+  background: rgba($priority-high, 0.2);
+  color: lighten($priority-high, 10%);
+
+  .light & {
+    color: $priority-high;
+  }
+}
+
+// Status Badges
+.status-todo {
+  background: rgba($status-todo, 0.2);
+  color: lighten($status-todo, 20%);
+
+  .light & {
+    color: $status-todo;
+  }
+}
+
+.status-in-progress {
+  background: rgba($status-in-progress, 0.2);
+  color: lighten($status-in-progress, 10%);
+
+  .light & {
+    color: $status-in-progress;
+  }
+}
+
+.status-done {
+  background: rgba($status-done, 0.2);
+  color: lighten($status-done, 10%);
+
+  .light & {
+    color: $status-done;
+  }
+}
+
+.status-overdue {
+  background: rgba($status-overdue, 0.2);
+  color: lighten($status-overdue, 10%);
+
+  .light & {
+    color: $status-overdue;
+  }
+}
+
+// Avatar Gradients
+.avatar-gradient-1 {
+  @include avatar-gradient(#8b5cf6, #6366f1);
+}
+
+.avatar-gradient-2 {
+  @include avatar-gradient(#10b981, #14b8a6);
+}
+
+.avatar-gradient-3 {
+  @include avatar-gradient(#f43f5e, #ec4899);
+}
+
+.avatar-gradient-4 {
+  @include avatar-gradient(#3b82f6, #06b6d4);
+}
+
+.avatar-gradient-5 {
+  @include avatar-gradient(#f59e0b, #f97316);
+}
+
+.avatar-gradient-6 {
+  @include avatar-gradient(#a855f7, #d946ef);
+}
+
+.avatar-gradient-7 {
+  @include avatar-gradient(#22c55e, #10b981);
+}
+
+.avatar-gradient-8 {
+  @include avatar-gradient(#ef4444, #f43f5e);
+}
+
+// Focus States
+.focus-ring {
+  @include focus-ring;
+}
+
+// Scrollbar Styling
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+.light ::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.light ::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
+}
+

@@ -1,0 +1,137 @@
+// ============================================
+// MIXINS DESIGN SYSTEM
+// ============================================
+
+@import 'variables';
+
+// Glassmorphism Effect
+@mixin glass($opacity-light: 0.3, $opacity-dark: 0.1) {
+  background: rgba(255, 255, 255, $opacity-dark);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: $shadow-sm;
+
+  .light & {
+    background: rgba(255, 255, 255, $opacity-light);
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+}
+
+// Card con Glassmorphism e Hover
+@mixin card {
+  @include glass;
+  border-radius: $radius-2xl;
+  transition: all $transition-duration-base $transition-easing-in-out;
+
+  &:hover {
+    transform: scale(1.02);
+    box-shadow: $shadow-md;
+  }
+}
+
+// Accent Button con Gradiente
+@mixin accent-button {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-2;
+  padding: $spacing-2 $spacing-3;
+  border-radius: $radius-xl;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: white;
+  background: linear-gradient(135deg, $color-accent, $color-accent-gradient-end);
+  box-shadow: $shadow-sm;
+  border: none;
+  cursor: pointer;
+  transition: all $transition-duration-base $transition-easing-in-out;
+
+  &:hover {
+    filter: brightness(1.05);
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+// Accent Outline Button
+@mixin accent-outline {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-2;
+  padding: $spacing-2 $spacing-3;
+  border-radius: $radius-xl;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.05);
+  color: $text-primary-dark;
+  cursor: pointer;
+  transition: all $transition-duration-base $transition-easing-in-out;
+
+  .light & {
+    border-color: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.2);
+    color: $text-primary-light;
+  }
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+
+    .light & {
+      background: rgba(0, 0, 0, 0.05);
+    }
+  }
+}
+
+// Theme Animation
+@mixin theme-anim {
+  transition-property: background-color, color, border-color, outline-color, fill, stroke, box-shadow;
+  transition-duration: $transition-duration-base;
+  transition-timing-function: $transition-easing;
+}
+
+// Responsive Breakpoints
+@mixin respond-to($breakpoint) {
+  @if $breakpoint == sm {
+    @media (min-width: $breakpoint-sm) { @content; }
+  }
+  @if $breakpoint == md {
+    @media (min-width: $breakpoint-md) { @content; }
+  }
+  @if $breakpoint == lg {
+    @media (min-width: $breakpoint-lg) { @content; }
+  }
+  @if $breakpoint == xl {
+    @media (min-width: $breakpoint-xl) { @content; }
+  }
+  @if $breakpoint == 2xl {
+    @media (min-width: $breakpoint-2xl) { @content; }
+  }
+}
+
+// Focus Ring
+@mixin focus-ring($color: $color-accent, $opacity: 0.5) {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba($color, $opacity);
+}
+
+// Line Clamp
+@mixin line-clamp($lines: 2) {
+  display: -webkit-box;
+  -webkit-line-clamp: $lines;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+// Avatar Gradient
+@mixin avatar-gradient($from, $to) {
+  background: linear-gradient(to bottom right, $from, $to);
+}
+

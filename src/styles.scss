@@ -26,13 +26,13 @@ html, body {
 
 body {
   font-family: $font-sans;
-  background: linear-gradient(to bottom right, $bg-light, $bg-dark);
-  color: $text-primary-light;
+  background: linear-gradient(to bottom right, $bg-dark-mode, $bg-dark-mode-secondary);
+  color: $text-primary-dark;
   @include theme-anim;
 
-  &.dark {
-    background: linear-gradient(to bottom right, $bg-dark-mode, $bg-dark-mode-secondary);
-    color: $text-primary-dark;
+  &.light {
+    background: linear-gradient(to bottom right, $bg-light, $bg-dark);
+    color: $text-primary-light;
   }
 }
 
