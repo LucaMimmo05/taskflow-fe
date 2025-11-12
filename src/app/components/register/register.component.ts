@@ -14,6 +14,8 @@ export class RegisterComponent {
   
   // Logo path con timestamp per evitare cache
   logoPath = `/assets/logo.png?v=${Date.now()}`;
+  // Immagine laterale
+  leftImagePath = `/assets/Group2.png?v=${Date.now()}`;
 
   togglePassword(field: 'password' | 'confirmPassword'): void {
     if (field === 'password') {
