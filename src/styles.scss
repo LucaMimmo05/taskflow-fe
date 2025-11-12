@@ -1,0 +1,107 @@
+// ============================================
+// STYLES PRINCIPALI - DESIGN SYSTEM
+// ============================================
+
+@import '@fontsource-variable/inter';
+@import 'styles/variables';
+@import 'styles/mixins';
+@import 'styles/animations';
+@import 'styles/utilities';
+
+// ============================================
+// RESET E BASE
+// ============================================
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+body {
+  font-family: $font-sans;
+  background: linear-gradient(to bottom right, $bg-light, $bg-dark);
+  color: $text-primary-light;
+  @include theme-anim;
+
+  &.dark {
+    background: linear-gradient(to bottom right, $bg-dark-mode, $bg-dark-mode-secondary);
+    color: $text-primary-dark;
+  }
+}
+
+#root, app-root {
+  height: 100%;
+  display: block;
+}
+
+// ============================================
+// TIPOGRAFIA
+// ============================================
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  line-height: 1.2;
+  color: inherit;
+}
+
+h1 {
+  font-size: 1.5rem; // text-2xl
+}
+
+h2 {
+  font-size: 1.25rem; // text-xl
+}
+
+h3 {
+  font-size: 1.125rem; // text-lg
+}
+
+p {
+  line-height: 1.5;
+}
+
+// ============================================
+// VARIABILI CSS PER UTILIZZO IN TEMPLATE
+// ============================================
+
+:root {
+  --font-sans: #{$font-sans};
+  --color-accent: #{$color-accent};
+  --color-accent-dark: #{$color-accent-dark};
+  --color-accent-gradient-end: #{$color-accent-gradient-end};
+  
+  // Background
+  --bg-light: #{$bg-light};
+  --bg-dark: #{$bg-dark};
+  --bg-dark-mode: #{$bg-dark-mode};
+  --bg-dark-mode-secondary: #{$bg-dark-mode-secondary};
+  
+  // Text
+  --text-primary-light: #{$text-primary-light};
+  --text-primary-dark: #{$text-primary-dark};
+  --text-secondary-light: #{$text-secondary-light};
+  --text-secondary-dark: #{$text-secondary-dark};
+  --text-muted: #{$text-muted};
+  
+  // Spacing
+  --spacing-1: #{$spacing-1};
+  --spacing-2: #{$spacing-2};
+  --spacing-3: #{$spacing-3};
+  --spacing-4: #{$spacing-4};
+  --spacing-6: #{$spacing-6};
+  --spacing-8: #{$spacing-8};
+  
+  // Radius
+  --radius-lg: #{$radius-lg};
+  --radius-xl: #{$radius-xl};
+  --radius-2xl: #{$radius-2xl};
+  --radius-full: #{$radius-full};
+}
+
