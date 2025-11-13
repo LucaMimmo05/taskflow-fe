@@ -1,149 +1,157 @@
 <div class="register-container">
-  <!-- Sfondo animato con gradienti -->
-  <div class="register-background"></div>
-  
-  <div class="register-layout">
-    <!-- Parte Sinistra: Immagine -->
-    <div class="register-left">
-      <div class="register-left-content">
-        <img [src]="leftImagePath" alt="TaskFlow" class="register-image" />
-        <p class="register-slogan">
-          <span class="slogan-text">Organizza i tuoi progetti col tuo Team</span>
-        </p>
-      </div>
-    </div>
+    <!-- Sfondo animato con gradienti -->
+    <div class="register-background"></div>
 
-    <!-- Parte Destra: Form -->
-    <div class="register-right">
-      <div class="register-card">
-        <div class="register-header">
-          <h2 class="register-title">Crea il tuo account</h2>
-          <p class="register-description">Inizia a gestire i tuoi progetti</p>
+    <div class="register-layout">
+        <!-- Parte Sinistra: Immagine -->
+        <div class="register-left">
+            <div class="register-left-content">
+                <img [src]="leftImagePath" alt="TaskFlow" class="register-image" />
+                <p class="register-slogan">
+                    <span class="slogan-text">Organizza i tuoi progetti col tuo Team</span>
+                </p>
+            </div>
         </div>
 
-        <!-- Form -->
-        <form class="register-form">
-          <!-- Nome -->
-          <div class="form-group">
-            <label for="nome" class="form-label" id="label-nome">
-              <svg class="form-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                <circle cx="12" cy="7" r="4"></circle>
-              </svg>
-              Nome
-            </label>
-            <input
-              id="nome"
-              type="text"
-              class="form-input"
-              placeholder="Il tuo nome completo"
-              aria-labelledby="label-nome"
-              aria-required="true"
-              autocomplete="name"
-            />
-          </div>
+        <!-- Parte Destra: Form -->
+        <div class="register-right">
+            <div class="register-card">
+                <div class="register-header">
+                    <h2 class="register-title">Crea il tuo account</h2>
+                    <p class="register-description">Inizia a gestire i tuoi progetti</p>
+                </div>
 
-          <!-- Email -->
-          <div class="form-group">
-            <label for="email" class="form-label" id="label-email">
-              <svg class="form-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-                <polyline points="22,6 12,13 2,6"></polyline>
-              </svg>
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              class="form-input"
-              placeholder="nome@esempio.com"
-              aria-labelledby="label-email"
-              aria-required="true"
-              autocomplete="email"
-            />
-          </div>
+                <!-- Form -->
+                <form class="register-form" (ngSubmit)="handleSubmit($event)" #form="ngForm" novalidate>
+                    <!-- Messaggio di errore generale -->
+                    <div *ngIf="submitError" class="alert alert-error" role="alert">
+                        {{ submitError }}
+                    </div>
 
-          <!-- Password -->
-          <div class="form-group">
-            <label for="password" class="form-label" id="label-password">
-              <svg class="form-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-              </svg>
-              Password
-            </label>
-            <div class="form-input-wrapper">
-              <input
-                id="password"
-                [type]="showPassword ? 'text' : 'password'"
-                class="form-input"
-                placeholder="Almeno 8 caratteri"
-                aria-labelledby="label-password"
-                aria-required="true"
-                autocomplete="new-password"
-              />
-              <button type="button" class="password-toggle" (click)="togglePassword('password')" aria-label="Mostra/Nascondi password" tabindex="0">
-                <svg *ngIf="!showPassword" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                  <circle cx="12" cy="12" r="3"></circle>
-                </svg>
-                <svg *ngIf="showPassword" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
-                  <line x1="1" y1="1" x2="23" y2="23"></line>
-                </svg>
-              </button>
+                    <!-- Nome -->
+                    <div class="form-group">
+                        <label for="nome" class="form-label" id="label-nome">
+                            <svg class="form-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                            Nome e Cognome
+                        </label>
+                        <input name="nome" id="nome" type="text" class="form-input" [class.input-error]="errors['nome']"
+                            placeholder="Il tuo nome completo" aria-labelledby="label-nome" aria-required="true"
+                            autocomplete="name" [(ngModel)]="formData.nome" [disabled]="isSubmitting" />
+                        <span *ngIf="errors['nome']" class="error-message">{{ errors['nome'] }}</span>
+                    </div>
+
+                    <!-- Email -->
+                    <div class="form-group">
+                        <label for="email" class="form-label" id="label-email">
+                            <svg class="form-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z">
+                                </path>
+                                <polyline points="22,6 12,13 2,6"></polyline>
+                            </svg>
+                            Email
+                        </label>
+                        <input name="email" id="email" type="email" class="form-input"
+                            [class.input-error]="errors['email']" placeholder="nome@esempio.com"
+                            aria-labelledby="label-email" aria-required="true" autocomplete="email"
+                            [(ngModel)]="formData.email" [disabled]="isSubmitting" />
+                        <span *ngIf="errors['email']" class="error-message">{{ errors['email'] }}</span>
+                    </div>
+
+                    <!-- Password -->
+                    <div class="form-group">
+                        <label for="password" class="form-label" id="label-password">
+                            <svg class="form-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                            </svg>
+                            Password
+                        </label>
+                        <div class="form-input-wrapper">
+                            <input name="password" id="password" [type]="showPassword ? 'text' : 'password'"
+                                class="form-input" [class.input-error]="errors['password']"
+                                placeholder="Almeno 8 caratteri" aria-labelledby="label-password" aria-required="true"
+                                autocomplete="new-password" [(ngModel)]="formData.password" [disabled]="isSubmitting" />
+                            <button type="button" class="password-toggle" (click)="togglePassword('password')"
+                                aria-label="Mostra/Nascondi password" tabindex="0" [disabled]="isSubmitting">
+                                <svg *ngIf="!showPassword" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                </svg>
+                                <svg *ngIf="showPassword" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2">
+                                    <path
+                                        d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24">
+                                    </path>
+                                    <line x1="1" y1="1" x2="23" y2="23"></line>
+                                </svg>
+                            </button>
+                        </div>
+                        <span *ngIf="errors['password']" class="error-message">{{ errors['password'] }}</span>
+                    </div>
+
+                    <!-- Conferma Password -->
+                    <div class="form-group">
+                        <label for="confirmPassword" class="form-label" id="label-confirmPassword">
+                            <svg class="form-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                            </svg>
+                            Conferma Password
+                        </label>
+                        <div class="form-input-wrapper">
+                            <input name="confirmPassword" id="confirmPassword"
+                                [type]="showConfirmPassword ? 'text' : 'password'" class="form-input"
+                                [class.input-error]="errors['confirmPassword']" placeholder="Ripeti la password"
+                                aria-labelledby="label-confirmPassword" aria-required="true" autocomplete="new-password"
+                                [(ngModel)]="formData.confirmPassword" [disabled]="isSubmitting" />
+                            <button type="button" class="password-toggle" (click)="togglePassword('confirmPassword')"
+                                aria-label="Mostra/Nascondi password conferma" tabindex="0" [disabled]="isSubmitting">
+                                <svg *ngIf="!showConfirmPassword" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                </svg>
+                                <svg *ngIf="showConfirmPassword" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2">
+                                    <path
+                                        d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24">
+                                    </path>
+                                    <line x1="1" y1="1" x2="23" y2="23"></line>
+                                </svg>
+                            </button>
+                        </div>
+                        <span *ngIf="errors['confirmPassword']" class="error-message">{{ errors['confirmPassword']
+                            }}</span>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" class="register-button" aria-label="Registrati e crea il tuo account"
+                        tabindex="0" [disabled]="isSubmitting">
+                        <span class="button-text" *ngIf="!isSubmitting">Registrati</span>
+                        <span class="button-text" *ngIf="isSubmitting">Registrazione in corso...</span>
+                        <svg *ngIf="!isSubmitting" class="button-arrow" width="16" height="16" viewBox="0 0 24 24"
+                            fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                    </button>
+                </form>
+
+                <!-- Footer -->
+                <div class="register-footer">
+                    <p class="register-footer-text">
+                        Hai già un account? <a routerLink="/login" class="register-link">Accedi</a>
+                    </p>
+                </div>
             </div>
-          </div>
-
-          <!-- Conferma Password -->
-          <div class="form-group">
-            <label for="confirmPassword" class="form-label" id="label-confirmPassword">
-              <svg class="form-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-              </svg>
-              Conferma Password
-            </label>
-            <div class="form-input-wrapper">
-              <input
-                id="confirmPassword"
-                [type]="showConfirmPassword ? 'text' : 'password'"
-                class="form-input"
-                placeholder="Ripeti la password"
-                aria-labelledby="label-confirmPassword"
-                aria-required="true"
-                autocomplete="new-password"
-              />
-              <button type="button" class="password-toggle" (click)="togglePassword('confirmPassword')" aria-label="Mostra/Nascondi password conferma" tabindex="0">
-                <svg *ngIf="!showConfirmPassword" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                  <circle cx="12" cy="12" r="3"></circle>
-                </svg>
-                <svg *ngIf="showConfirmPassword" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
-                  <line x1="1" y1="1" x2="23" y2="23"></line>
-                </svg>
-              </button>
-            </div>
-          </div>
-
-          <!-- Submit Button -->
-          <button type="submit" class="register-button" aria-label="Registrati e crea il tuo account" tabindex="0">
-            <span class="button-text">Registrati</span>
-            <svg class="button-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-              <line x1="5" y1="12" x2="19" y2="12"></line>
-              <polyline points="12 5 19 12 12 19"></polyline>
-            </svg>
-          </button>
-        </form>
-
-        <!-- Footer -->
-        <div class="register-footer">
-          <p class="register-footer-text">
-            Hai già un account? <a routerLink="/login" class="register-link">Accedi</a>
-          </p>
         </div>
-      </div>
     </div>
-  </div>
 </div>
