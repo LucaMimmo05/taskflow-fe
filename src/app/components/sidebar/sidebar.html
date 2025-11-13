@@ -64,12 +64,73 @@
   </nav>
 
   <div class="sidebar-footer">
-    <button class="user-menu-btn">
-      <div class="user-avatar avatar-gradient-1">U</div>
+    <button 
+      class="user-menu-btn" 
+      (dblclick)="onProfileDoubleClick()"
+      [attr.aria-expanded]="showProfilePopup">
+      <div class="user-avatar avatar-gradient-1" [style.border-color]="getStatusColor()">
+        <span class="status-indicator" [style.background-color]="getStatusColor()"></span>
+        {{ userInitial }}
+      </div>
       <div class="user-info">
-        <span class="user-name">Utente</span>
-        <span class="user-email">utente@example.com</span>
+        <span class="user-name">{{ userName }}</span>
+        <span class="user-email">{{ userEmail }}</span>
       </div>
     </button>
+    
+    <!-- Pop-up profilo -->
+    <div class="profile-popup" *ngIf="showProfilePopup">
+      <div class="popup-header">
+        <h3 class="popup-title">Profilo</h3>
+      </div>
+      
+      <div class="popup-content">
+        <!-- Sezione Impostazioni -->
+        <button class="popup-item" (click)="openSettings()">
+          <svg class="popup-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M12 1v6m0 6v6M5.64 5.64l4.24 4.24m4.24 4.24l4.24 4.24M1 12h6m6 0h6M5.64 18.36l4.24-4.24m4.24-4.24l4.24-4.24"></path>
+          </svg>
+          <span>Impostazioni</span>
+        </button>
+        
+        <!-- Sezione Stato -->
+        <div class="popup-section">
+          <div class="popup-section-title">Stato</div>
+          <div class="status-options">
+            <button 
+              class="status-option" 
+              [class.active]="userStatus === 'disponibile'"
+              (click)="setStatus('disponibile')">
+              <span class="status-dot" style="background-color: #10b981;"></span>
+              <span>Disponibile</span>
+              <svg *ngIf="userStatus === 'disponibile'" class="status-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </button>
+            <button 
+              class="status-option" 
+              [class.active]="userStatus === 'occupato'"
+              (click)="setStatus('occupato')">
+              <span class="status-dot" style="background-color: #fbbf24;"></span>
+              <span>Occupato</span>
+              <svg *ngIf="userStatus === 'occupato'" class="status-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </button>
+            <button 
+              class="status-option" 
+              [class.active]="userStatus === 'in-riunione'"
+              (click)="setStatus('in-riunione')">
+              <span class="status-dot" style="background-color: #0ea5e9;"></span>
+              <span>In riunione</span>
+              <svg *ngIf="userStatus === 'in-riunione'" class="status-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </aside>
