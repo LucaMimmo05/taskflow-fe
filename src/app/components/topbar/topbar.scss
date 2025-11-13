@@ -1,0 +1,216 @@
+@import '../../../styles/variables';
+@import '../../../styles/mixins';
+
+.topbar {
+  position: sticky;
+  top: $spacing-3;
+  z-index: 50;
+  @include glass(0.15, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  padding: 0 $spacing-6;
+  height: 64px;
+  margin: 0 $spacing-3;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+
+  body.light & {
+    border-color: rgba(0, 0, 0, 0.1);
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.1),
+      0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+  }
+}
+
+.topbar-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+  gap: $spacing-4;
+}
+
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: $spacing-4;
+  flex: 1;
+  max-width: 600px;
+}
+
+.menu-toggle {
+  display: none;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: $text-secondary-dark;
+  cursor: pointer;
+  border-radius: $radius-xl;
+  transition: all 0.2s $transition-easing-in-out;
+
+  body.light & {
+    color: $text-secondary-light;
+  }
+
+  @media (max-width: $breakpoint-lg) {
+    display: flex;
+  }
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: $color-accent;
+  }
+}
+
+.search-container {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.search-icon {
+  position: absolute;
+  left: $spacing-3;
+  color: $text-secondary-dark;
+  pointer-events: none;
+
+  body.light & {
+    color: $text-secondary-light;
+  }
+}
+
+.search-input {
+  width: 100%;
+  padding: $spacing-2 $spacing-3 $spacing-2 40px;
+  border-radius: $radius-xl;
+  @include glass(0.1, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 0.9375rem;
+  color: $text-primary-dark;
+  transition: all 0.2s $transition-easing-in-out;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+
+  body.light & {
+    border-color: rgba(0, 0, 0, 0.1);
+    color: $text-primary-light;
+    background: rgba(255, 255, 255, 0.4);
+  }
+
+  &::placeholder {
+    color: $text-secondary-dark;
+
+    body.light & {
+      color: $text-secondary-light;
+    }
+  }
+
+  &:focus {
+    outline: none;
+    border-color: rgba(108, 99, 255, 0.5);
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.1);
+
+    body.light & {
+      background: rgba(255, 255, 255, 0.6);
+    }
+  }
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: $spacing-2;
+}
+
+.topbar-btn {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: $text-secondary-dark;
+  cursor: pointer;
+  border-radius: $radius-xl;
+  transition: all 0.2s $transition-easing-in-out;
+  position: relative;
+
+  body.light & {
+    color: $text-secondary-light;
+  }
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: $color-accent;
+
+    body.light & {
+      background: rgba(0, 0, 0, 0.05);
+    }
+  }
+}
+
+.notification-badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 18px;
+  height: 18px;
+  background: $color-accent;
+  color: white;
+  border-radius: 50%;
+  font-size: 0.625rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid $bg-dark-mode;
+
+  body.light & {
+    border-color: $bg-light;
+  }
+}
+
+.user-menu {
+  margin-left: $spacing-2;
+}
+
+.user-avatar-btn {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: all 0.2s $transition-easing-in-out;
+
+  &:hover {
+    transform: scale(1.05);
+  }
+}
+
+.user-avatar-small {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
