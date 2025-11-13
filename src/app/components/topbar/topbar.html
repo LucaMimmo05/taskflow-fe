@@ -1,0 +1,49 @@
+<header class="topbar">
+  <div class="topbar-content">
+    <div class="topbar-left">
+      <button class="menu-toggle" aria-label="Toggle menu">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+      
+      <div class="search-container">
+        <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <path d="m21 21-4.35-4.35"></path>
+        </svg>
+        <input 
+          type="text" 
+          class="search-input" 
+          placeholder="Cerca progetti, task, persone..."
+          [(ngModel)]="searchQuery"
+        />
+      </div>
+    </div>
+
+    <div class="topbar-right">
+      <button class="topbar-btn" aria-label="Notifiche">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+          <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+        </svg>
+        <span class="notification-badge">3</span>
+      </button>
+
+      <button class="topbar-btn" aria-label="Impostazioni">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M12 1v6m0 6v6m9-9h-6m-6 0H3m15.364 6.364L16.95 16.95m-5.9-5.9L7.05 7.05M21.364 4.636L16.95 9.05m-5.9 5.9L7.05 16.95"></path>
+        </svg>
+      </button>
+
+      <div class="user-menu">
+        <button class="user-avatar-btn">
+          <div class="user-avatar-small avatar-gradient-1">U</div>
+        </button>
+      </div>
+    </div>
+  </div>
+</header>
