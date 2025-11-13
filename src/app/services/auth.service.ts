@@ -8,7 +8,7 @@ import { UserRequest, LoginRequest, LoginResponse } from '../models/user.model';
  * Comunica con il backend Quarkus
  */
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthService {
   private readonly apiUrl = 'http://localhost:8080/api';
@@ -32,5 +32,48 @@ export class AuthService {
   login(loginRequest: LoginRequest): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.apiUrl}/auth/login`, loginRequest);
   }
-}
 
+  /**
+   * Verifica se l'utente è autenticato
+   * @returns true se il token è presente, false altrimenti
+   */
+  isAuthenticated(): boolean {
+    const token = localStorage.getItem('access_token');
+    return !!token;
+  }
+
+  /**
+   * Ottiene il token di accesso
+   * @returns Il token salvato o null
+   */
+  getAccessToken(): string | null {
+    return localStorage.getItem('access_token');
+  }
+
+  /**
+   * Ottiene il refresh token
+   * @returns Il refresh token salvato o null
+   */
+  getRefreshToken(): string | null {
+    return localStorage.getItem('refresh_token');
+  }
+
+  /**
+   * Ottiene i dati dell'utente corrente
+   * @returns I dati dell'utente o null
+   */
+  getCurrentUser(): any {
+    const userStr = localStorage.getItem('user');
+    return userStr ? JSON.parse(userStr) : null;
+  }
+
+  /**
+   * Effettua il logout
+   * Rimuove token e dati utente dal localStorage
+   */
+  logout(): void {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('user');
+  }
+}
