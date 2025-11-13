@@ -116,8 +116,8 @@ export class RegisterComponent {
         localStorage.setItem('refresh_token', response.refreshToken);
         localStorage.setItem('user', JSON.stringify(response.user));
 
-        // Redirect alla dashboard
-        this.router.navigate(['/dashboard']);
+        // Redirect alla home
+        this.router.navigate(['/home']);
       },
       error: (error) => {
         this.isSubmitting = false;
