@@ -79,12 +79,13 @@ export class LoginComponent {
     this.isSubmitting = true;
     this.authService.login(loginRequest).subscribe({
       next: (response) => {
-        // Salva il token
-        localStorage.setItem('auth_token', response.token);
+        // Salva i token
+        localStorage.setItem('access_token', response.accessToken);
+        localStorage.setItem('refresh_token', response.refreshToken);
         localStorage.setItem('user', JSON.stringify(response.user));
 
-        // Redirect alla dashboard o home
-        this.router.navigate(['/']);
+        // Redirect alla dashboard
+        this.router.navigate(['/dashboard']);
       },
       error: (error) => {
         this.isSubmitting = false;
