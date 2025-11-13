@@ -24,9 +24,11 @@
                 <!-- Form -->
                 <form class="register-form" (ngSubmit)="handleSubmit($event)" #form="ngForm" novalidate>
                     <!-- Messaggio di errore generale -->
-                    <div *ngIf="submitError" class="alert alert-error" role="alert">
+                    @if (submitError) {
+                    <div class="alert alert-error" role="alert">
                         {{ submitError }}
                     </div>
+                    }
 
                     <!-- Nome -->
                     <div class="form-group">
@@ -41,7 +43,9 @@
                         <input name="nome" id="nome" type="text" class="form-input" [class.input-error]="errors['nome']"
                             placeholder="Il tuo nome completo" aria-labelledby="label-nome" aria-required="true"
                             autocomplete="name" [(ngModel)]="formData.nome" [disabled]="isSubmitting" />
-                        <span *ngIf="errors['nome']" class="error-message">{{ errors['nome'] }}</span>
+                        @if (errors['nome']) {
+                        <span class="error-message">{{ errors['nome'] }}</span>
+                        }
                     </div>
 
                     <!-- Email -->
@@ -59,7 +63,9 @@
                             [class.input-error]="errors['email']" placeholder="nome@esempio.com"
                             aria-labelledby="label-email" aria-required="true" autocomplete="email"
                             [(ngModel)]="formData.email" [disabled]="isSubmitting" />
-                        <span *ngIf="errors['email']" class="error-message">{{ errors['email'] }}</span>
+                        @if (errors['email']) {
+                        <span class="error-message">{{ errors['email'] }}</span>
+                        }
                     </div>
 
                     <!-- Password -->
@@ -79,21 +85,27 @@
                                 autocomplete="new-password" [(ngModel)]="formData.password" [disabled]="isSubmitting" />
                             <button type="button" class="password-toggle" (click)="togglePassword('password')"
                                 aria-label="Mostra/Nascondi password" tabindex="0" [disabled]="isSubmitting">
-                                <svg *ngIf="!showPassword" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                                    stroke="currentColor" stroke-width="2">
+                                @if (!showPassword) {
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
                                     <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                                     <circle cx="12" cy="12" r="3"></circle>
                                 </svg>
-                                <svg *ngIf="showPassword" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                                    stroke="currentColor" stroke-width="2">
+                                }
+                                @if (showPassword) {
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
                                     <path
                                         d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24">
                                     </path>
                                     <line x1="1" y1="1" x2="23" y2="23"></line>
                                 </svg>
+                                }
                             </button>
                         </div>
-                        <span *ngIf="errors['password']" class="error-message">{{ errors['password'] }}</span>
+                        @if (errors['password']) {
+                        <span class="error-message">{{ errors['password'] }}</span>
+                        }
                     </div>
 
                     <!-- Conferma Password -->
@@ -114,34 +126,45 @@
                                 [(ngModel)]="formData.confirmPassword" [disabled]="isSubmitting" />
                             <button type="button" class="password-toggle" (click)="togglePassword('confirmPassword')"
                                 aria-label="Mostra/Nascondi password conferma" tabindex="0" [disabled]="isSubmitting">
-                                <svg *ngIf="!showConfirmPassword" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                                    stroke="currentColor" stroke-width="2">
+                                @if (!showConfirmPassword) {
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
                                     <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                                     <circle cx="12" cy="12" r="3"></circle>
                                 </svg>
-                                <svg *ngIf="showConfirmPassword" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                                    stroke="currentColor" stroke-width="2">
+                                }
+                                @if (showConfirmPassword) {
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
                                     <path
                                         d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24">
                                     </path>
                                     <line x1="1" y1="1" x2="23" y2="23"></line>
                                 </svg>
+                                }
                             </button>
                         </div>
-                        <span *ngIf="errors['confirmPassword']" class="error-message">{{ errors['confirmPassword']
-                            }}</span>
+                        @if (errors['confirmPassword']) {
+                        <span class="error-message">{{ errors['confirmPassword'] }}</span>
+                        }
                     </div>
 
                     <!-- Submit Button -->
                     <button type="submit" class="register-button" aria-label="Registrati e crea il tuo account"
                         tabindex="0" [disabled]="isSubmitting">
-                        <span class="button-text" *ngIf="!isSubmitting">Registrati</span>
-                        <span class="button-text" *ngIf="isSubmitting">Registrazione in corso...</span>
-                        <svg *ngIf="!isSubmitting" class="button-arrow" width="16" height="16" viewBox="0 0 24 24"
-                            fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        @if (!isSubmitting) {
+                        <span class="button-text">Registrati</span>
+                        }
+                        @if (isSubmitting) {
+                        <span class="button-text">Registrazione in corso...</span>
+                        }
+                        @if (!isSubmitting) {
+                        <svg class="button-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" aria-hidden="true">
                             <line x1="5" y1="12" x2="19" y2="12"></line>
                             <polyline points="12 5 19 12 12 19"></polyline>
                         </svg>
+                        }
                     </button>
                 </form>
 
