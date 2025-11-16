@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { UserRequest, LoginRequest, LoginResponse } from '../models/user.model';
+import { Observable, tap } from 'rxjs';
+import { UserRequest, LoginRequest, LoginResponse, UserResponse } from '../models/user.model';
 
 /**
  * Servizio per la gestione dell'autenticazione
@@ -16,21 +16,35 @@ export class AuthService {
   constructor(private http: HttpClient) {}
 
   /**
-   * Registra un nuovo utente
+   * Registra un nuovo utente e salva automaticamente i dati
    * @param userRequest Dati utente per la registrazione
    * @returns Observable con token e dati utente
    */
   register(userRequest: UserRequest): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(`${this.apiUrl}/auth/register`, userRequest);
+    return this.http.post<LoginResponse>(`${this.apiUrl}/auth/register`, userRequest).pipe(
+      tap(response => this.saveAuthData(response))
+    );
   }
 
   /**
-   * Effettua il login
+   * Effettua il login e salva automaticamente i dati
    * @param loginRequest Credenziali di accesso
    * @returns Observable con token e dati utente
    */
   login(loginRequest: LoginRequest): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(`${this.apiUrl}/auth/login`, loginRequest);
+    return this.http.post<LoginResponse>(`${this.apiUrl}/auth/login`, loginRequest).pipe(
+      tap(response => this.saveAuthData(response))
+    );
+  }
+
+  /**
+   * Salva i dati di autenticazione nel localStorage
+   * @param response Risposta dal backend con token e user
+   */
+  private saveAuthData(response: LoginResponse): void {
+    localStorage.setItem('access_token', response.token);
+    localStorage.removeItem('refresh_token'); // Non più utilizzato nella nuova API
+    localStorage.setItem('user', JSON.stringify(response.user));
   }
 
   /**
@@ -51,18 +65,10 @@ export class AuthService {
   }
 
   /**
-   * Ottiene il refresh token
-   * @returns Il refresh token salvato o null
-   */
-  getRefreshToken(): string | null {
-    return localStorage.getItem('refresh_token');
-  }
-
-  /**
    * Ottiene i dati dell'utente corrente
    * @returns I dati dell'utente o null
    */
-  getCurrentUser(): any {
+  getCurrentUser(): UserResponse | null {
     const userStr = localStorage.getItem('user');
     return userStr ? JSON.parse(userStr) : null;
   }
@@ -73,7 +79,6 @@ export class AuthService {
    */
   logout(): void {
     localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
     localStorage.removeItem('user');
   }
 }

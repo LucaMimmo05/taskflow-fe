@@ -23,9 +23,7 @@ export interface LoginRequest {
  * Allineato con il backend Quarkus LoginResponse
  */
 export interface LoginResponse {
-  message: string;
-  accessToken: string;
-  refreshToken: string;
+  token: string;
   user: UserResponse;
 }
 
@@ -37,5 +35,22 @@ export interface UserResponse {
   id: string;
   displayName: string;
   email: string;
+  notifyOnDue: boolean;
+}
+
+/**
+ * Request per aggiornare il profilo utente
+ */
+export interface UpdateUserRequest {
+  displayName: string;
+  email: string;
+  password: string;
+  notifyOnDue?: boolean;
+}
+
+/**
+ * Request per aggiornare le impostazioni
+ */
+export interface UpdateSettingsRequest {
   notifyOnDue: boolean;
 }

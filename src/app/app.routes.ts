@@ -1,7 +1,7 @@
 import { Routes } from '@angular/router';
-import { RegisterComponent } from './components/register/register.component';
-import { LoginComponent } from './components/login/login.component';
-import { Home } from './components/home/home';
+import { RegisterComponent } from './pages/register/register.component';
+import { LoginComponent } from './pages/login/login.component';
+import { Home } from './pages/home/home';
 import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
