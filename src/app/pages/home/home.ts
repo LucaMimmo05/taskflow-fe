@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Sidebar } from '../sidebar/sidebar';
-import { Topbar } from '../topbar/topbar';
+import { Sidebar } from '../../components/sidebar/sidebar';
+import { Topbar } from '../../components/topbar/topbar';
 
 @Component({
   selector: 'app-home',

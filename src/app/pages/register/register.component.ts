@@ -110,13 +110,8 @@ export class RegisterComponent {
     // Invio richiesta
     this.isSubmitting = true;
     this.authService.register(userRequest).subscribe({
-      next: (response) => {
-        // Salva i token
-        localStorage.setItem('access_token', response.accessToken);
-        localStorage.setItem('refresh_token', response.refreshToken);
-        localStorage.setItem('user', JSON.stringify(response.user));
-
-        // Redirect alla home
+      next: () => {
+        // AuthService salva automaticamente i token
         this.router.navigate(['/home']);
       },
       error: (error) => {
