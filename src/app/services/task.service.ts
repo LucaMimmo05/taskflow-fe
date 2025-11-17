@@ -25,10 +25,11 @@ export class TaskService {
    */
   private getHeaders(): HttpHeaders {
     const token = this.authService.getAccessToken();
-    return new HttpHeaders({
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    });
+    let headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    if (token && token !== 'undefined' && token !== 'null') {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+    return headers;
   }
 
   /**

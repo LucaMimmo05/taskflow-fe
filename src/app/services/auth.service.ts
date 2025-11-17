@@ -41,10 +41,21 @@ export class AuthService {
    * Salva i dati di autenticazione nel localStorage
    * @param response Risposta dal backend con token e user
    */
-  private saveAuthData(response: LoginResponse): void {
-    localStorage.setItem('access_token', response.token);
-    localStorage.removeItem('refresh_token'); // Non più utilizzato nella nuova API
-    localStorage.setItem('user', JSON.stringify(response.user));
+  private saveAuthData(response: LoginResponse | any): void {
+    const token: string | undefined = response?.token ?? response?.accessToken;
+
+    if (token && token !== 'undefined' && token !== 'null') {
+      localStorage.setItem('access_token', token);
+    } else {
+      localStorage.removeItem('access_token');
+    }
+
+    // refresh_token non più usato
+    localStorage.removeItem('refresh_token');
+
+    if (response?.user) {
+      localStorage.setItem('user', JSON.stringify(response.user));
+    }
   }
 
   /**
@@ -53,7 +64,9 @@ export class AuthService {
    */
   isAuthenticated(): boolean {
     const token = localStorage.getItem('access_token');
-    return !!token;
+    if (!token) return false;
+    if (token === 'undefined' || token === 'null') return false;
+    return true;
   }
 
   /**

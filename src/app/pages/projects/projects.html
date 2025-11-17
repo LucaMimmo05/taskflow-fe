@@ -1,0 +1,89 @@
+<div class="projects-page">
+  <div class="header">
+    <h1 class="title">Progetti</h1>
+    <button class="create-btn" (click)="openCreateModal()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="12" y1="5" x2="12" y2="19"></line>
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+      </svg>
+      Nuovo Progetto
+    </button>
+  </div>
+
+  <div *ngIf="loading" class="loading">Caricamento...</div>
+  <div *ngIf="!loading && projects.length === 0" class="empty">Nessun progetto. Creane uno!</div>
+  <div *ngIf="error" class="error">{{ error }}</div>
+
+  <div class="projects-grid" *ngIf="!loading && projects.length > 0">
+    <div *ngFor="let project of projects" class="project-card" (click)="goToProject(project)">
+      <div class="card-header">
+        <h2 class="project-title">{{ project.title }}</h2>
+        <span class="creator">Di {{ project.creatorName }}</span>
+      </div>
+      <div class="phases">
+        <div *ngFor="let phase of project.phases" class="phase-pill">{{ phase.title }}</div>
+      </div>
+      <div class="labels" *ngIf="project.labels.length > 0">
+        <span *ngFor="let label of project.labels" class="label-badge" [style.background-color]="label.color">{{ label.title }}</span>
+      </div>
+      <div class="dates">
+        <span class="date" title="Creato">{{ project.createdAt | date:'short' }}</span>
+        <span class="date" title="Aggiornato">{{ project.updatedAt | date:'short' }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Creazione -->
+  <div class="modal-backdrop" *ngIf="showCreateModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Nuovo Progetto</h2>
+        <button class="close-btn" (click)="closeCreateModal()" [disabled]="creating">×</button>
+      </div>
+
+      <div class="modal-body">
+        <div *ngIf="error" class="error mb">{{ error }}</div>
+
+        <label class="field">
+          <span>Titolo</span>
+          <input type="text" [(ngModel)]="projectTitle" placeholder="Titolo progetto" />
+        </label>
+
+        <div class="section">
+          <div class="section-header">
+            <span>Fasi (max 3)</span>
+            <button class="mini-btn" (click)="addPhase()" [disabled]="phases.length >= 3">+ Fase</button>
+          </div>
+          <div class="phase-list">
+            <div class="phase-item" *ngFor="let phase of phases; let i = index">
+              <input type="text" [(ngModel)]="phase.title" placeholder="Titolo fase" />
+              <button class="remove-btn" (click)="removePhase(i)" *ngIf="phases.length > 1">×</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-header">
+            <span>Etichette (opzionali)</span>
+            <button class="mini-btn" (click)="addLabel()">+ Label</button>
+          </div>
+          <div class="label-list">
+            <div class="label-item" *ngFor="let label of labels; let li = index">
+              <input type="text" [(ngModel)]="label.title" placeholder="Titolo" />
+              <input type="color" [(ngModel)]="label.color" />
+              <button class="remove-btn" (click)="removeLabel(li)">×</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="secondary" (click)="closeCreateModal()" [disabled]="creating">Annulla</button>
+        <button class="primary" (click)="submitCreate()" [disabled]="creating">
+          <span *ngIf="!creating">Crea</span>
+          <span *ngIf="creating">Creazione...</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

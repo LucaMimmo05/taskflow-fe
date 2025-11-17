@@ -1,0 +1,89 @@
+@import '../../../styles/variables';
+@import '../../../styles/mixins';
+
+.projects-page {
+  padding: $spacing-6;
+  min-height: 100vh;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-6;
+}
+
+.title {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
+  color: $text-primary-dark;
+  letter-spacing: -0.02em;
+  body.light & { color: $text-primary-light; }
+}
+
+.create-btn {
+  @include accent-button;
+  font-size: 0.875rem;
+}
+
+.loading, .empty, .error { opacity: 0.9; font-size: 0.875rem; }
+.error { color: $status-overdue; }
+
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill,minmax(300px,1fr));
+  gap: $spacing-4;
+}
+
+.project-card {
+  @include glass(0.15,0.05);
+  border-radius: $radius-2xl;
+  padding: $spacing-4;
+  cursor: pointer;
+  border: 1px solid rgba(255,255,255,0.1);
+  transition: all $transition-duration-base $transition-easing;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-3;
+  body.light & { border-color: rgba(0,0,0,0.1); }
+  &:hover { transform: translateY(-4px); box-shadow: $shadow-md; }
+}
+
+.card-header { display:flex; flex-direction:column; gap:$spacing-1; }
+.project-title { margin:0; font-size:1.125rem; font-weight:600; }
+.creator { font-size:0.75rem; color:$text-secondary-dark; body.light & { color:$text-secondary-light; } }
+
+.phases { display:flex; flex-wrap:wrap; gap:$spacing-2; }
+.phase-pill { padding:4px 10px; font-size:0.6875rem; font-weight:600; border-radius:$radius-full; background:rgba(255,255,255,0.08); body.light & { background:rgba(0,0,0,0.06); } }
+
+.labels { display:flex; flex-wrap:wrap; gap:$spacing-2; }
+.label-badge { padding:4px 8px; font-size:0.625rem; font-weight:600; border-radius:$radius-full; color:#fff; letter-spacing:0.02em; }
+
+.dates { display:flex; gap:$spacing-3; font-size:0.625rem; opacity:0.7; }
+
+/* Modal */
+.modal-backdrop { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.6); z-index:300; }
+.modal { width:520px; max-width:90%; @include glass(0.25,0.12); border-radius:$radius-2xl; padding:$spacing-4; position:relative; border:1px solid rgba(255,255,255,0.15); body.light & { border-color:rgba(0,0,0,0.15); } }
+.modal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:$spacing-4; }
+.modal-header h2 { margin:0; font-size:1.25rem; }
+.close-btn { background:none; border:none; font-size:1.25rem; cursor:pointer; color:$text-primary-dark; body.light & { color:$text-primary-light; } }
+.modal-body { display:flex; flex-direction:column; gap:$spacing-4; max-height:60vh; overflow-y:auto; }
+.field { display:flex; flex-direction:column; gap:$spacing-2; font-size:0.75rem; }
+.field input { padding:$spacing-3; border-radius:$radius-xl; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.1); color:$text-primary-dark; body.light & { background:rgba(0,0,0,0.05); color:$text-primary-light; border-color:rgba(0,0,0,0.1); } }
+
+.section { display:flex; flex-direction:column; gap:$spacing-3; }
+.section-header { display:flex; justify-content:space-between; align-items:center; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; }
+.mini-btn { padding:4px 10px; font-size:0.625rem; border-radius:$radius-full; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); cursor:pointer; body.light & { background:rgba(0,0,0,0.05); border-color:rgba(0,0,0,0.15); } &:hover { background:rgba(108,99,255,0.25); } }
+
+.phase-list, .label-list { display:flex; flex-direction:column; gap:$spacing-2; }
+.phase-item, .label-item { display:flex; align-items:center; gap:$spacing-2; }
+.phase-item input, .label-item input[type=text] { flex:1; padding:$spacing-2 $spacing-3; border-radius:$radius-lg; border:1px solid rgba(255,255,255,0.15); background:rgba(255,255,255,0.05); color:$text-primary-dark; body.light & { background:rgba(0,0,0,0.05); color:$text-primary-light; border-color:rgba(0,0,0,0.15); } }
+.label-item input[type=color] { width:40px; height:32px; padding:2px; border-radius:$radius-lg; border:1px solid rgba(255,255,255,0.2); background:transparent; cursor:pointer; }
+.remove-btn { background:none; border:none; color:$text-secondary-dark; cursor:pointer; font-size:1rem; padding:0 6px; body.light & { color:$text-secondary-light; } &:hover { color:$color-accent; } }
+
+.modal-footer { display:flex; justify-content:flex-end; gap:$spacing-3; margin-top:$spacing-2; }
+.primary { @include accent-button; }
+.secondary { @include accent-outline; }
+
+.mb { margin-bottom:$spacing-2; }

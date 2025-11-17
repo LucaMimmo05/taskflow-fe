@@ -31,10 +31,11 @@ export class ProjectService {
    */
   private getHeaders(): HttpHeaders {
     const token = this.authService.getAccessToken();
-    return new HttpHeaders({
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    });
+    let headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    if (token && token !== 'undefined' && token !== 'null') {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+    return headers;
   }
 
   /**
@@ -43,6 +44,17 @@ export class ProjectService {
    */
   getProjects(): Observable<Project[]> {
     return this.http.get<Project[]>(this.apiUrl, {
+      headers: this.getHeaders()
+    });
+  }
+
+  /**
+   * Ottiene un singolo progetto per ID
+   * @param projectId ID del progetto
+   * @returns Observable con il progetto
+   */
+  getProject(projectId: string): Observable<Project> {
+    return this.http.get<Project>(`${this.apiUrl}/${projectId}`, {
       headers: this.getHeaders()
     });
   }
