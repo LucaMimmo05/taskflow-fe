@@ -112,7 +112,7 @@ export class RegisterComponent {
     this.authService.register(userRequest).subscribe({
       next: () => {
         // AuthService salva automaticamente i token
-        this.router.navigate(['/home']);
+        this.router.navigate(['/']);
       },
       error: (error) => {
         this.isSubmitting = false;
