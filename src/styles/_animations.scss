@@ -1,0 +1,167 @@
+// ============================================
+// ANIMAZIONI DESIGN SYSTEM
+// ============================================
+
+@import 'variables';
+@import 'mixins';
+
+// Theme Transition
+.theme-anim,
+.theme-anim * {
+  @include theme-anim;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .theme-anim,
+  .theme-anim * {
+    transition: none !important;
+  }
+}
+
+// Fade In Animation
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn $transition-duration-base $transition-easing-out;
+}
+
+// Fade Out Animation
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+
+.fade-out {
+  animation: fadeOut $transition-duration-fast $transition-easing-in;
+}
+
+// Scale In Animation (per Modal)
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.scale-in {
+  animation: scaleIn 150ms $transition-easing-out;
+}
+
+// Scale Out Animation (per Modal)
+@keyframes scaleOut {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}
+
+.scale-out {
+  animation: scaleOut $transition-duration-fast $transition-easing-in;
+}
+
+// Bounce Animation (per Loading)
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-25%);
+  }
+}
+
+.bounce {
+  animation: bounce 1s infinite;
+}
+
+.bounce-delay-1 {
+  animation-delay: 0ms;
+}
+
+.bounce-delay-2 {
+  animation-delay: 150ms;
+}
+
+.bounce-delay-3 {
+  animation-delay: 300ms;
+}
+
+// Pulse Animation
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+// Slide In From Right (per Dropdown)
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(8px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+.slide-in-right {
+  animation: slideInRight $transition-duration-fast $transition-easing-out;
+}
+
+// Slide Out To Right (per Dropdown)
+@keyframes slideOutRight {
+  from {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(8px) scale(0.95);
+  }
+}
+
+.slide-out-right {
+  animation: slideOutRight 75ms $transition-easing-in;
+}
+
+// Progress Bar Animation
+@keyframes progressBar {
+  from {
+    width: 0%;
+  }
+}
+
+.progress-bar {
+  animation: progressBar 1s $transition-easing-out;
+}
+

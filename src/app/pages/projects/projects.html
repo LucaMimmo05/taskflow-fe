@@ -1,0 +1,207 @@
+<div class="projects-page">
+    <div class="header">
+        <div class="header-left">
+            <h1 class="title">Progetti</h1>
+            <span class="subtitle">Gestisci i tuoi progetti e le relative task</span>
+        </div>
+        <button class="create-btn" (click)="openCreateModal()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            Nuovo Progetto
+        </button>
+    </div>
+
+    <div *ngIf="loading" class="loading">
+        <div class="spinner"></div>
+        <p>Caricamento progetti...</p>
+    </div>
+    <div *ngIf="!loading && projects.length === 0" class="empty">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+            opacity="0.5">
+            <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z" />
+        </svg>
+        <p>Nessun progetto</p>
+        <span>Crea il tuo primo progetto per iniziare!</span>
+    </div>
+    <div *ngIf="error && !loading" class="error-banner">{{ error }}</div>
+
+    <div class="projects-grid" *ngIf="!loading && projects.length > 0">
+        <div *ngFor="let project of projects" class="project-card" (click)="goToProject(project)">
+            <div class="card-actions">
+                <button class="action-btn" (click)="openEditModal(project, $event)" title="Modifica">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
+                        <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
+                    </svg>
+                </button>
+                <button class="action-btn danger" (click)="confirmDelete(project, $event)" title="Elimina">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="3 6 5 6 21 6" />
+                        <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+                    </svg>
+                </button>
+            </div>
+
+            <div class="card-header">
+                <h2 class="project-title">{{ project.title }}</h2>
+                <span class="creator">Creato da {{ project.creatorName }}</span>
+            </div>
+
+            <div class="card-meta">
+                <span class="meta-item">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 11l3 3L22 4" />
+                        <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />
+                    </svg>
+                    {{ project.taskCount || 0 }} task
+                </span>
+                <span class="meta-item">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="8" y1="6" x2="21" y2="6" />
+                        <line x1="8" y1="12" x2="21" y2="12" />
+                        <line x1="8" y1="18" x2="21" y2="18" />
+                        <line x1="3" y1="6" x2="3.01" y2="6" />
+                        <line x1="3" y1="12" x2="3.01" y2="12" />
+                        <line x1="3" y1="18" x2="3.01" y2="18" />
+                    </svg>
+                    {{ project.phases?.length || 0 }} fasi
+                </span>
+                <span class="meta-item">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                        <line x1="16" y1="2" x2="16" y2="6" />
+                        <line x1="8" y1="2" x2="8" y2="6" />
+                        <line x1="3" y1="10" x2="21" y2="10" />
+                    </svg>
+                    {{ project.createdAt | date:'dd MMM yyyy' }}
+                </span>
+            </div>
+
+            <div class="card-footer">
+                <span class="open-link">
+                    Apri progetto
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 12h14M12 5l7 7-7 7" />
+                    </svg>
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Creazione -->
+    <div class="modal-backdrop" *ngIf="showCreateModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Nuovo Progetto</h2>
+                <button class="close-btn" (click)="closeCreateModal()" [disabled]="creating">×</button>
+            </div>
+
+            <div class="modal-body">
+                <div *ngIf="error" class="error mb">{{ error }}</div>
+
+                <label class="field">
+                    <span>Titolo *</span>
+                    <input type="text" [(ngModel)]="projectTitle" placeholder="Titolo progetto" />
+                </label>
+
+                <div class="section">
+                    <div class="section-header">
+                        <span>Fasi (max 3)</span>
+                        <button class="mini-btn" (click)="addPhase()" [disabled]="phases.length >= 3">+ Fase</button>
+                    </div>
+                    <div class="phase-list">
+                        <div class="phase-item" *ngFor="let phase of phases; let i = index">
+                            <input type="text" [(ngModel)]="phase.title" placeholder="Titolo fase" />
+                            <button class="remove-btn" (click)="removePhase(i)" *ngIf="phases.length > 1">×</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-header">
+                        <span>Etichette (opzionali)</span>
+                        <button class="mini-btn" (click)="addLabel()">+ Label</button>
+                    </div>
+                    <div class="label-list">
+                        <div class="label-item" *ngFor="let label of labels; let li = index">
+                            <input type="text" [(ngModel)]="label.title" placeholder="Titolo" />
+                            <input type="color" [(ngModel)]="label.color" />
+                            <button class="remove-btn" (click)="removeLabel(li)">×</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="secondary" (click)="closeCreateModal()" [disabled]="creating">Annulla</button>
+                <button class="primary" (click)="submitCreate()" [disabled]="creating">
+                    <span *ngIf="!creating">Crea</span>
+                    <span *ngIf="creating">Creazione...</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Modifica -->
+    <div class="modal-backdrop" *ngIf="showEditModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Modifica Progetto</h2>
+                <button class="close-btn" (click)="closeEditModal()" [disabled]="editing">×</button>
+            </div>
+
+            <div class="modal-body">
+                <div *ngIf="error" class="error mb">{{ error }}</div>
+
+                <label class="field">
+                    <span>Titolo *</span>
+                    <input type="text" [(ngModel)]="editTitle" placeholder="Titolo progetto" />
+                </label>
+
+                <div class="info-section">
+                    <p class="info-text">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <circle cx="12" cy="12" r="10" />
+                            <line x1="12" y1="16" x2="12" y2="12" />
+                            <line x1="12" y1="8" x2="12.01" y2="8" />
+                        </svg>
+                        Le fasi e le etichette possono essere modificate nella vista dettaglio del progetto.
+                    </p>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="secondary" (click)="closeEditModal()" [disabled]="editing">Annulla</button>
+                <button class="primary" (click)="submitEdit()" [disabled]="editing">
+                    <span *ngIf="!editing">Salva</span>
+                    <span *ngIf="editing">Salvataggio...</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Conferma Eliminazione -->
+    <div class="modal-backdrop" *ngIf="showDeleteConfirm">
+        <div class="modal modal-sm">
+            <div class="modal-header">
+                <h2>Elimina Progetto</h2>
+                <button class="close-btn" (click)="cancelDelete()" [disabled]="deleting">×</button>
+            </div>
+            <div class="modal-body">
+                <p>Sei sicuro di voler eliminare il progetto "<strong>{{ projectToDelete?.title }}</strong>"?</p>
+                <p class="warning">Tutte le task associate verranno eliminate. Questa azione non può essere annullata.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button class="secondary" (click)="cancelDelete()" [disabled]="deleting">Annulla</button>
+                <button class="danger" (click)="deleteProject()" [disabled]="deleting">
+                    <span *ngIf="!deleting">Elimina</span>
+                    <span *ngIf="deleting">Eliminazione...</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

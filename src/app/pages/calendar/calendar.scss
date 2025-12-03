@@ -1,0 +1,591 @@
+@import '../../../styles/variables';
+@import '../../../styles/mixins';
+
+.calendar-page {
+  padding: $spacing-4;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+// Header
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: $spacing-6;
+  gap: $spacing-4;
+}
+
+.header-left {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-1;
+}
+
+.title {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
+  color: $text-primary-dark;
+  letter-spacing: -0.02em;
+
+  body.light & {
+    color: $text-primary-light;
+  }
+}
+
+.subtitle {
+  font-size: 0.875rem;
+  color: $text-secondary-dark;
+
+  body.light & {
+    color: $text-secondary-light;
+  }
+}
+
+.today-btn {
+  @include accent-button;
+  font-size: 0.875rem;
+}
+
+// Loading & Error States
+.loading-state,
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-4;
+  flex: 1;
+  min-height: 400px;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  border-top-color: $color-accent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Calendar Container
+.calendar-container {
+  @include glass(0.12, 0.06);
+  border-radius: $radius-2xl;
+  padding: $spacing-3;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+
+  body.light & {
+    border-color: rgba(0, 0, 0, 0.08);
+  }
+}
+
+// Month Navigation
+.month-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-4;
+  margin-bottom: $spacing-4;
+}
+
+.nav-btn {
+  @include glass(0.15, 0.08);
+  border: none;
+  border-radius: $radius-lg;
+  padding: $spacing-2;
+  cursor: pointer;
+  color: $text-primary-dark;
+  transition: all $transition-duration-base $transition-easing;
+
+  body.light & {
+    color: $text-primary-light;
+  }
+
+  &:hover {
+    background: rgba(108, 99, 255, 0.2);
+  }
+}
+
+.month-label {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: $text-primary-dark;
+  min-width: 200px;
+  text-align: center;
+  text-transform: capitalize;
+
+  body.light & {
+    color: $text-primary-light;
+  }
+}
+
+// Calendar Grid
+.calendar-grid {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px;
+  margin-bottom: $spacing-2;
+  flex-shrink: 0;
+}
+
+.weekday {
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: $text-secondary-dark;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: $spacing-2;
+
+  body.light & {
+    color: $text-secondary-light;
+  }
+}
+
+.weeks {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.week {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px;
+}
+
+.day-cell {
+  min-height: 80px;
+  max-height: 120px;
+  padding: $spacing-2;
+  border-radius: $radius-lg;
+  background: rgba(255, 255, 255, 0.03);
+  cursor: pointer;
+  transition: all $transition-duration-base $transition-easing;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid transparent;
+  overflow: hidden;
+
+  body.light & {
+    background: rgba(0, 0, 0, 0.02);
+  }
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(108, 99, 255, 0.3);
+
+    body.light & {
+      background: rgba(0, 0, 0, 0.05);
+    }
+  }
+
+  &.other-month {
+    opacity: 0.4;
+  }
+
+  &.today {
+    background: rgba(108, 99, 255, 0.15);
+    border-color: $color-accent;
+
+    .day-number {
+      background: $color-accent;
+      color: white;
+    }
+  }
+
+  &.has-tasks {
+    background: rgba(255, 255, 255, 0.05);
+
+    body.light & {
+      background: rgba(0, 0, 0, 0.03);
+    }
+  }
+}
+
+.day-number {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: $text-primary-dark;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: $radius-full;
+  margin-bottom: $spacing-1;
+
+  body.light & {
+    color: $text-primary-light;
+  }
+}
+
+.day-tasks {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  overflow: hidden;
+}
+
+.task-dot {
+  display: flex;
+  align-items: center;
+  padding: 2px 6px;
+  border-radius: $radius-lg;
+  background: rgba(108, 99, 255, 0.2);
+  transition: all $transition-duration-fast $transition-easing;
+
+  &:hover {
+    background: rgba(108, 99, 255, 0.4);
+  }
+
+  &.overdue {
+    background: rgba(244, 63, 94, 0.2);
+
+    &:hover {
+      background: rgba(244, 63, 94, 0.4);
+    }
+  }
+}
+
+.task-dot-label {
+  font-size: 0.625rem;
+  font-weight: 500;
+  color: $text-primary-dark;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  body.light & {
+    color: $text-primary-light;
+  }
+}
+
+.more-tasks {
+  font-size: 0.5625rem;
+  color: $text-secondary-dark;
+  text-align: center;
+  padding-top: 2px;
+
+  body.light & {
+    color: $text-secondary-light;
+  }
+}
+
+// Modals
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: $z-modal;
+  backdrop-filter: blur(4px);
+}
+
+.modal {
+  width: 480px;
+  max-width: 90%;
+  max-height: 80vh;
+  @include glass(0.25, 0.12);
+  border-radius: $radius-2xl;
+  padding: $spacing-4;
+  position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  display: flex;
+  flex-direction: column;
+
+  body.light & {
+    border-color: rgba(0, 0, 0, 0.15);
+  }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-4;
+
+  h2 {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+    text-transform: capitalize;
+  }
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  cursor: pointer;
+  color: $text-primary-dark;
+  padding: $spacing-1;
+
+  body.light & {
+    color: $text-primary-light;
+  }
+
+  &:hover {
+    color: $color-accent;
+  }
+}
+
+.modal-body {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: $spacing-3;
+  margin-top: $spacing-4;
+  padding-top: $spacing-4;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+
+  body.light & {
+    border-color: rgba(0, 0, 0, 0.1);
+  }
+}
+
+.primary {
+  @include accent-button;
+}
+
+.secondary {
+  @include accent-outline;
+}
+
+// Empty Day
+.empty-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-3;
+  padding: $spacing-6;
+  color: $text-secondary-dark;
+
+  body.light & {
+    color: $text-secondary-light;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.875rem;
+  }
+}
+
+// Day Task List
+.day-task-list {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-3;
+}
+
+.day-task-item {
+  @include glass(0.15, 0.08);
+  border-radius: $radius-xl;
+  padding: $spacing-3;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all $transition-duration-base $transition-easing;
+
+  body.light & {
+    border-color: rgba(0, 0, 0, 0.1);
+  }
+
+  &:hover {
+    border-color: rgba(108, 99, 255, 0.3);
+    transform: translateX(4px);
+  }
+}
+
+.task-info {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-1;
+  margin-bottom: $spacing-2;
+}
+
+.task-title {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: $text-primary-dark;
+
+  body.light & {
+    color: $text-primary-light;
+  }
+}
+
+.task-project {
+  font-size: 0.6875rem;
+  color: $text-secondary-dark;
+
+  body.light & {
+    color: $text-secondary-light;
+  }
+}
+
+.task-labels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-1;
+}
+
+.task-label {
+  padding: 2px 8px;
+  font-size: 0.5625rem;
+  font-weight: 600;
+  border-radius: $radius-full;
+  color: #fff;
+}
+
+// Task Detail
+.task-detail {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-4;
+}
+
+.task-detail-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: $text-primary-dark;
+
+  body.light & {
+    color: $text-primary-light;
+  }
+}
+
+.detail-row {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-1;
+}
+
+.detail-label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: $text-secondary-dark;
+
+  body.light & {
+    color: $text-secondary-light;
+  }
+}
+
+.detail-value {
+  font-size: 0.875rem;
+  color: $text-primary-dark;
+
+  body.light & {
+    color: $text-primary-light;
+  }
+
+  &.overdue {
+    color: $status-overdue;
+  }
+}
+
+.detail-labels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-2;
+}
+
+.project-link {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-1;
+  background: none;
+  border: none;
+  color: $color-accent;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0;
+  transition: all $transition-duration-fast $transition-easing;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.assignee-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-2;
+}
+
+.assignee-badge {
+  padding: 4px 10px;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  border-radius: $radius-full;
+  background: rgba(255, 255, 255, 0.1);
+  color: $text-primary-dark;
+
+  body.light & {
+    background: rgba(0, 0, 0, 0.08);
+    color: $text-primary-light;
+  }
+}
+
+// Responsive
+@media (max-width: $breakpoint-md) {
+  .day-cell {
+    min-height: 60px;
+    padding: $spacing-1;
+  }
+
+  .day-number {
+    font-size: 0.75rem;
+    width: 24px;
+    height: 24px;
+  }
+
+  .task-dot-label {
+    display: none;
+  }
+
+  .task-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    padding: 0;
+  }
+}
