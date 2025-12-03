@@ -1,0 +1,124 @@
+<div class="tasks-page">
+    <div class="header">
+        <div class="header-left">
+            <h1 class="title">Le mie Task</h1>
+            <span class="subtitle">Tutte le task assegnate a te dai vari progetti</span>
+        </div>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-value">{{ totalCount }}</div>
+            <div class="stat-label">Task totali</div>
+        </div>
+        <div class="stat-card upcoming">
+            <div class="stat-value">{{ upcomingCount }}</div>
+            <div class="stat-label">In scadenza</div>
+        </div>
+        <div class="stat-card overdue" *ngIf="overdueCount > 0">
+            <div class="stat-value">{{ overdueCount }}</div>
+            <div class="stat-label">Scadute</div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters-section">
+        <div class="search-box">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <input type="text" placeholder="Cerca task..." [(ngModel)]="searchQuery" (input)="applyFilters()" />
+        </div>
+
+        <div class="filter-group">
+            <select [(ngModel)]="selectedProject" (change)="applyFilters()">
+                <option value="">Tutti i progetti</option>
+                <option *ngFor="let project of projects" [value]="project.id">{{ project.title }}</option>
+            </select>
+
+            <button class="clear-btn" *ngIf="searchQuery || selectedProject" (click)="clearFilters()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+                Cancella filtri
+            </button>
+        </div>
+    </div>
+
+    <!-- Loading -->
+    <div *ngIf="loading" class="loading">
+        <div class="spinner"></div>
+        <p>Caricamento task...</p>
+    </div>
+
+    <!-- Error -->
+    <div *ngIf="error && !loading" class="error-banner">{{ error }}</div>
+
+    <!-- Empty State -->
+    <div *ngIf="!loading && allTasks.length === 0" class="empty">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+            opacity="0.5">
+            <path d="M9 11l3 3L22 4" />
+            <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />
+        </svg>
+        <p>Nessuna task</p>
+        <span>Le task dei tuoi progetti appariranno qui</span>
+    </div>
+
+    <!-- No Results -->
+    <div *ngIf="!loading && allTasks.length > 0 && filteredTasks.length === 0" class="empty">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+            opacity="0.5">
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+        </svg>
+        <p>Nessun risultato</p>
+        <span>Prova a modificare i filtri di ricerca</span>
+    </div>
+
+    <!-- Tasks List -->
+    <div class="tasks-list" *ngIf="!loading && filteredTasks.length > 0">
+        <div *ngFor="let task of filteredTasks" class="task-item" [class.overdue]="isOverdue(task.dueDate)"
+            (click)="goToTask(task)">
+            <div class="task-color" [style.background-color]="task.projectColor"></div>
+
+            <div class="task-content">
+                <div class="task-header">
+                    <h3 class="task-title">{{ task.title }}</h3>
+                </div>
+
+                <p class="task-description" *ngIf="task.description">{{ task.description }}</p>
+
+                <div class="task-meta">
+                    <span class="task-project">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z" />
+                        </svg>
+                        {{ task.projectTitle }}
+                    </span>
+                    <span class="task-due" [class.overdue]="isOverdue(task.dueDate)"
+                        [class.upcoming]="isUpcoming(task.dueDate)">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                            <line x1="16" y1="2" x2="16" y2="6" />
+                            <line x1="8" y1="2" x2="8" y2="6" />
+                            <line x1="3" y1="10" x2="21" y2="10" />
+                        </svg>
+                        {{ formatDate(task.dueDate) }}
+                    </span>
+                </div>
+            </div>
+
+            <div class="task-action">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 18l6-6-6-6" />
+                </svg>
+            </div>
+        </div>
+    </div>
+</div>
