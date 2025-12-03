@@ -115,6 +115,20 @@
     border-color: rgba(0, 0, 0, 0.1);
   }
 
+  &.clickable {
+    cursor: pointer;
+
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow: $shadow-lg;
+      border-color: rgba($color-accent, 0.3);
+    }
+
+    &:active {
+      transform: translateY(-2px);
+    }
+  }
+
   &:hover {
     transform: translateY(-2px);
     box-shadow: $shadow-md;
