@@ -1,0 +1,303 @@
+<div class="project-detail-page">
+    <!-- Loading State -->
+    <div *ngIf="loading" class="loading-state">
+        <div class="spinner"></div>
+        <p>Caricamento progetto...</p>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="error && !loading" class="error-state">
+        <p>{{ error }}</p>
+        <button class="secondary" (click)="goBack()">Torna ai progetti</button>
+    </div>
+
+    <!-- Project Content -->
+    <div *ngIf="project && !loading" class="project-content">
+        <!-- Header -->
+        <div class="project-header">
+            <div class="header-left">
+                <button class="back-btn" (click)="goBack()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M19 12H5M12 19l-7-7 7-7" />
+                    </svg>
+                </button>
+                <div class="header-info">
+                    <h1 class="project-title">{{ project.title }}</h1>
+                    <span class="project-meta">
+                        Creato da {{ project.creatorName }} • {{ project.createdAt | date:'mediumDate' }}
+                    </span>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="action-btn" (click)="openCollaboratorsModal()" title="Collaboratori">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                    <span class="collaborator-count">{{ project.collaborators.length }}</span>
+                </button>
+                <button class="action-btn" (click)="openEditProjectModal()" title="Modifica progetto">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
+                        <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
+                    </svg>
+                </button>
+                <button class="action-btn danger" (click)="confirmDeleteProject()" title="Elimina progetto">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="3 6 5 6 21 6" />
+                        <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+                        <line x1="10" y1="11" x2="10" y2="17" />
+                        <line x1="14" y1="11" x2="14" y2="17" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Labels -->
+        <div class="project-labels" *ngIf="project.labels.length > 0">
+            <span *ngFor="let label of project.labels" class="label-badge" [style.background-color]="label.color">
+                {{ label.title }}
+            </span>
+        </div>
+
+        <!-- Kanban Board -->
+        <div class="kanban-board">
+            <div *ngFor="let phase of project.phases" class="kanban-column">
+                <div class="column-header">
+                    <h3 class="column-title">{{ phase.title }}</h3>
+                    <span class="task-count">{{ getTasksByPhase(phase.id).length }}</span>
+                    <button class="add-task-btn" (click)="openCreateTaskModal(phase.id)" title="Aggiungi task">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19" />
+                            <line x1="5" y1="12" x2="19" y2="12" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="column-tasks">
+                    <div *ngFor="let task of getTasksByPhase(phase.id)" class="task-card"
+                        (click)="openEditTaskModal(task)">
+                        <div class="task-header">
+                            <h4 class="task-title">{{ task.title }}</h4>
+                            <button class="delete-task-btn" (click)="confirmDeleteTask(task); $event.stopPropagation()"
+                                title="Elimina">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <line x1="18" y1="6" x2="6" y2="18" />
+                                    <line x1="6" y1="6" x2="18" y2="18" />
+                                </svg>
+                            </button>
+                        </div>
+                        <p *ngIf="task.description" class="task-description">{{ task.description }}</p>
+                        <div class="task-labels" *ngIf="task.labels.length > 0">
+                            <span *ngFor="let label of task.labels" class="task-label"
+                                [style.background-color]="label.color">
+                                {{ label.title }}
+                            </span>
+                        </div>
+                        <div class="task-footer">
+                            <span *ngIf="task.dueDate" class="task-due" [class.overdue]="isOverdue(task.dueDate)">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                                    <line x1="16" y1="2" x2="16" y2="6" />
+                                    <line x1="8" y1="2" x2="8" y2="6" />
+                                    <line x1="3" y1="10" x2="21" y2="10" />
+                                </svg>
+                                {{ formatDate(task.dueDate) }}
+                            </span>
+                            <span *ngIf="task.assignees.length > 0" class="task-assignees">
+                                <span *ngFor="let a of task.assignees.slice(0, 2)" class="assignee-avatar"
+                                    [title]="a.displayName">
+                                    {{ a.displayName.charAt(0).toUpperCase() }}
+                                </span>
+                                <span *ngIf="task.assignees.length > 2" class="assignee-more">+{{ task.assignees.length
+                                    - 2 }}</span>
+                            </span>
+                        </div>
+                    </div>
+                    <div *ngIf="getTasksByPhase(phase.id).length === 0" class="empty-column">
+                        <p>Nessuna task</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Task Modal -->
+    <div class="modal-backdrop" *ngIf="showTaskModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>{{ editingTask ? 'Modifica Task' : 'Nuova Task' }}</h2>
+                <button class="close-btn" (click)="closeTaskModal()" [disabled]="savingTask">×</button>
+            </div>
+            <div class="modal-body">
+                <div *ngIf="error" class="error mb">{{ error }}</div>
+
+                <label class="field">
+                    <span>Titolo *</span>
+                    <input type="text" [(ngModel)]="taskForm.title" placeholder="Titolo task" />
+                </label>
+
+                <label class="field">
+                    <span>Descrizione</span>
+                    <textarea [(ngModel)]="taskForm.description" placeholder="Descrizione (opzionale)"
+                        rows="3"></textarea>
+                </label>
+
+                <label class="field">
+                    <span>Fase</span>
+                    <select [(ngModel)]="taskForm.phaseId">
+                        <option *ngFor="let phase of project?.phases" [value]="phase.id">{{ phase.title }}</option>
+                    </select>
+                </label>
+
+                <label class="field">
+                    <span>Scadenza</span>
+                    <input type="date" [(ngModel)]="taskForm.dueDate" />
+                </label>
+
+                <div class="field" *ngIf="project && project.labels.length > 0">
+                    <span>Etichette</span>
+                    <div class="labels-select">
+                        <button *ngFor="let label of project.labels" class="label-option"
+                            [class.selected]="isLabelSelected(label.id)" [style.border-color]="label.color"
+                            [style.background-color]="isLabelSelected(label.id) ? label.color : 'transparent'"
+                            (click)="toggleLabel(label.id)">
+                            {{ label.title }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="secondary" (click)="closeTaskModal()" [disabled]="savingTask">Annulla</button>
+                <button class="primary" (click)="submitTask()" [disabled]="savingTask">
+                    <span *ngIf="!savingTask">{{ editingTask ? 'Salva' : 'Crea' }}</span>
+                    <span *ngIf="savingTask">Salvataggio...</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Task Confirmation -->
+    <div class="modal-backdrop" *ngIf="showDeleteConfirm">
+        <div class="modal modal-sm">
+            <div class="modal-header">
+                <h2>Elimina Task</h2>
+                <button class="close-btn" (click)="cancelDeleteTask()" [disabled]="deletingTask">×</button>
+            </div>
+            <div class="modal-body">
+                <p>Sei sicuro di voler eliminare la task "<strong>{{ taskToDelete?.title }}</strong>"?</p>
+                <p class="warning">Questa azione non può essere annullata.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="secondary" (click)="cancelDeleteTask()" [disabled]="deletingTask">Annulla</button>
+                <button class="danger" (click)="deleteTask()" [disabled]="deletingTask">
+                    <span *ngIf="!deletingTask">Elimina</span>
+                    <span *ngIf="deletingTask">Eliminazione...</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Project Modal -->
+    <div class="modal-backdrop" *ngIf="showEditProjectModal">
+        <div class="modal modal-sm">
+            <div class="modal-header">
+                <h2>Modifica Progetto</h2>
+                <button class="close-btn" (click)="closeEditProjectModal()" [disabled]="savingProject">×</button>
+            </div>
+            <div class="modal-body">
+                <div *ngIf="error" class="error mb">{{ error }}</div>
+                <label class="field">
+                    <span>Titolo *</span>
+                    <input type="text" [(ngModel)]="editProjectForm.title" placeholder="Titolo progetto" />
+                </label>
+            </div>
+            <div class="modal-footer">
+                <button class="secondary" (click)="closeEditProjectModal()" [disabled]="savingProject">Annulla</button>
+                <button class="primary" (click)="submitEditProject()" [disabled]="savingProject">
+                    <span *ngIf="!savingProject">Salva</span>
+                    <span *ngIf="savingProject">Salvataggio...</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Project Confirmation -->
+    <div class="modal-backdrop" *ngIf="showDeleteProjectConfirm">
+        <div class="modal modal-sm">
+            <div class="modal-header">
+                <h2>Elimina Progetto</h2>
+                <button class="close-btn" (click)="cancelDeleteProject()" [disabled]="deletingProject">×</button>
+            </div>
+            <div class="modal-body">
+                <p>Sei sicuro di voler eliminare il progetto "<strong>{{ project?.title }}</strong>"?</p>
+                <p class="warning">Tutte le task associate verranno eliminate. Questa azione non può essere annullata.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button class="secondary" (click)="cancelDeleteProject()" [disabled]="deletingProject">Annulla</button>
+                <button class="danger" (click)="deleteProject()" [disabled]="deletingProject">
+                    <span *ngIf="!deletingProject">Elimina</span>
+                    <span *ngIf="deletingProject">Eliminazione...</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Collaborators Modal -->
+    <div class="modal-backdrop" *ngIf="showCollaboratorsModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Collaboratori</h2>
+                <button class="close-btn" (click)="closeCollaboratorsModal()" [disabled]="addingCollaborator">×</button>
+            </div>
+            <div class="modal-body">
+                <div *ngIf="error" class="error mb">{{ error }}</div>
+
+                <!-- Add Collaborator Form -->
+                <div class="add-collaborator-form">
+                    <input type="email" [(ngModel)]="collaboratorEmail" placeholder="Email del collaboratore"
+                        [disabled]="addingCollaborator" />
+                    <button class="primary" (click)="addCollaborator()"
+                        [disabled]="addingCollaborator || !collaboratorEmail.trim()">
+                        <span *ngIf="!addingCollaborator">Aggiungi</span>
+                        <span *ngIf="addingCollaborator">...</span>
+                    </button>
+                </div>
+
+                <!-- Collaborators List -->
+                <div class="collaborators-list">
+                    <div *ngFor="let collab of project?.collaborators" class="collaborator-item">
+                        <div class="collaborator-avatar">
+                            {{ collab.displayName.charAt(0).toUpperCase() }}
+                        </div>
+                        <div class="collaborator-info">
+                            <span class="collaborator-name">{{ collab.displayName }}</span>
+                            <span class="collaborator-role">{{ collab.role === 'creator' ? 'Creatore' : collab.role ===
+                                'admin' ? 'Admin' : 'Membro' }}</span>
+                        </div>
+                        <button *ngIf="!isCreator(collab)" class="remove-collaborator-btn"
+                            (click)="removeCollaborator(collab)" [disabled]="removingCollaboratorId === collab.userId"
+                            title="Rimuovi collaboratore">
+                            <svg *ngIf="removingCollaboratorId !== collab.userId" width="16" height="16"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="18" y1="6" x2="6" y2="18" />
+                                <line x1="6" y1="6" x2="18" y2="18" />
+                            </svg>
+                            <span *ngIf="removingCollaboratorId === collab.userId" class="mini-spinner"></span>
+                        </button>
+                        <span *ngIf="isCreator(collab)" class="creator-badge">Creatore</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="secondary" (click)="closeCollaboratorsModal()"
+                    [disabled]="addingCollaborator">Chiudi</button>
+            </div>
+        </div>
+    </div>
+</div>
