@@ -1,12 +1,209 @@
-<div class="home-container">
-  <app-sidebar></app-sidebar>
-  <div class="home-main">
-    <app-topbar></app-topbar>
-    <main class="home-content">
-      <div class="content-wrapper">
-        <h1>Benvenuto in TaskFlow</h1>
-        <p>Inizia a organizzare i tuoi progetti</p>
-      </div>
-    </main>
-  </div>
+<div class="home-page">
+    <!-- Header -->
+    <div class="dashboard-header">
+        <div class="greeting">
+            <h1>{{ getGreeting() }}, {{ userName }}!</h1>
+            <p>Ecco un riepilogo delle tue attività</p>
+        </div>
+        <div class="header-actions">
+            <button class="action-btn" (click)="goToCalendar()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                    <line x1="16" y1="2" x2="16" y2="6" />
+                    <line x1="8" y1="2" x2="8" y2="6" />
+                    <line x1="3" y1="10" x2="21" y2="10" />
+                </svg>
+                Calendario
+            </button>
+            <button class="action-btn primary" (click)="goToProjects()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z" />
+                </svg>
+                Tutti i Progetti
+            </button>
+        </div>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="loading" class="loading-state">
+        <div class="spinner"></div>
+        <p>Caricamento dashboard...</p>
+    </div>
+
+    <!-- Dashboard Content -->
+    <div *ngIf="!loading" class="dashboard-content">
+        <!-- Stats Cards -->
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-icon projects">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z" />
+                    </svg>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-value">{{ stats.totalProjects }}</span>
+                    <span class="stat-label">Progetti</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon tasks">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 11l3 3L22 4" />
+                        <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />
+                    </svg>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-value">{{ stats.totalTasks }}</span>
+                    <span class="stat-label">Task totali</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon completed">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10" />
+                        <path d="M9 12l2 2 4-4" />
+                    </svg>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-value">{{ getCompletionRate() }}%</span>
+                    <span class="stat-label">Completate</span>
+                </div>
+            </div>
+
+            <div class="stat-card" [class.warning]="stats.overdueTasks > 0">
+                <div class="stat-icon overdue">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="12" y1="8" x2="12" y2="12" />
+                        <line x1="12" y1="16" x2="12.01" y2="16" />
+                    </svg>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-value">{{ stats.overdueTasks }}</span>
+                    <span class="stat-label">Scadute</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Grid -->
+        <div class="dashboard-grid">
+            <!-- Recent Projects -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h2>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z" />
+                        </svg>
+                        Progetti Recenti
+                    </h2>
+                    <a class="see-all" (click)="goToProjects()">Vedi tutti →</a>
+                </div>
+                <div class="card-content">
+                    <div *ngIf="recentProjects.length === 0" class="empty-state">
+                        <p>Nessun progetto</p>
+                        <span>Crea il tuo primo progetto!</span>
+                    </div>
+                    <div *ngFor="let project of recentProjects" class="project-item" (click)="goToProject(project)">
+                        <div class="project-info">
+                            <span class="project-name">{{ project.title }}</span>
+                            <span class="project-meta">{{ project.phases?.length || 0 }} fasi</span>
+                        </div>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M9 18l6-6-6-6" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Upcoming Tasks -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h2>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <circle cx="12" cy="12" r="10" />
+                            <polyline points="12 6 12 12 16 14" />
+                        </svg>
+                        In Scadenza
+                    </h2>
+                    <a class="see-all" (click)="goToCalendar()">Calendario →</a>
+                </div>
+                <div class="card-content">
+                    <div *ngIf="upcomingTasks.length === 0" class="empty-state">
+                        <p>Nessuna task in scadenza</p>
+                        <span>Ottimo lavoro!</span>
+                    </div>
+                    <div *ngFor="let task of upcomingTasks" class="task-item">
+                        <div class="task-info">
+                            <span class="task-name">{{ task.title }}</span>
+                            <span class="task-project">{{ task.projectTitle }}</span>
+                        </div>
+                        <span class="task-due" [class.soon]="!isOverdue(task.dueDate!)">
+                            {{ formatDate(task.dueDate!) }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Overdue Tasks -->
+            <div class="dashboard-card overdue-card" *ngIf="overdueTasks.length > 0">
+                <div class="card-header">
+                    <h2>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path
+                                d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                            <line x1="12" y1="9" x2="12" y2="13" />
+                            <line x1="12" y1="17" x2="12.01" y2="17" />
+                        </svg>
+                        Task Scadute
+                    </h2>
+                </div>
+                <div class="card-content">
+                    <div *ngFor="let task of overdueTasks" class="task-item overdue">
+                        <div class="task-info">
+                            <span class="task-name">{{ task.title }}</span>
+                            <span class="task-project">{{ task.projectTitle }}</span>
+                        </div>
+                        <span class="task-due overdue">
+                            {{ formatDate(task.dueDate!) }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <h3>Azioni Rapide</h3>
+            <div class="actions-grid">
+                <button class="quick-action" (click)="goToProjects()">
+                    <div class="action-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19" />
+                            <line x1="5" y1="12" x2="19" y2="12" />
+                        </svg>
+                    </div>
+                    <span>Nuovo Progetto</span>
+                </button>
+                <button class="quick-action" (click)="goToCalendar()">
+                    <div class="action-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                            <line x1="16" y1="2" x2="16" y2="6" />
+                            <line x1="8" y1="2" x2="8" y2="6" />
+                            <line x1="3" y1="10" x2="21" y2="10" />
+                        </svg>
+                    </div>
+                    <span>Calendario</span>
+                </button>
+            </div>
+        </div>
+    </div>
 </div>

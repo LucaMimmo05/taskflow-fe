@@ -1,42 +1,476 @@
 @import '../../../styles/variables';
 @import '../../../styles/mixins';
 
-.home-container {
-  display: flex;
-  height: 100vh;
-  overflow: hidden;
-  background: linear-gradient(135deg, $bg-dark-mode 0%, $bg-dark-mode-secondary 50%, darken($bg-dark-mode, 2%) 100%);
+.home-page {
+  padding: $spacing-4;
+  height: 100%;
+  overflow-y: auto;
+}
 
-  body.light & {
-    background: linear-gradient(135deg, $bg-light 0%, $bg-dark 50%, lighten($bg-light, 1%) 100%);
+// Dashboard Header
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: $spacing-6;
+  gap: $spacing-4;
+  flex-wrap: wrap;
+}
+
+.greeting {
+  h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: $text-primary-dark;
+    margin: 0 0 $spacing-1;
+    letter-spacing: -0.02em;
+
+    body.light & {
+      color: $text-primary-light;
+    }
+  }
+
+  p {
+    font-size: 1rem;
+    color: $text-secondary-dark;
+    margin: 0;
+
+    body.light & {
+      color: $text-secondary-light;
+    }
   }
 }
 
-.home-main {
-  flex: 1;
+.header-actions {
+  display: flex;
+  gap: $spacing-2;
+}
+
+.action-btn {
+  @include accent-outline;
+  display: flex;
+  align-items: center;
+  gap: $spacing-2;
+  font-size: 0.875rem;
+
+  &.primary {
+    @include accent-button;
+  }
+}
+
+// Loading State
+.loading-state {
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-  margin-left: calc(280px + #{$spacing-3} * 2); /* Larghezza sidebar + margini */
-  padding-top: $spacing-3; /* Allineamento con sidebar */
-  transition: margin-left 0.3s $transition-easing-in-out;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-3;
+  min-height: 300px;
+  color: $text-secondary-dark;
 
-  @media (max-width: $breakpoint-lg) {
-    margin-left: 0;
-    padding-top: 0;
+  body.light & {
+    color: $text-secondary-light;
+  }
+
+  p {
+    margin: 0;
+    font-size: 1rem;
   }
 }
 
-.home-content {
-  flex: 1;
-  overflow-y: auto;
-  padding: $spacing-6;
-  padding-top: calc(64px + #{$spacing-3}); /* Altezza topbar + margine */
-  position: relative;
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  border-top-color: $color-accent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
 }
 
-.content-wrapper {
-  max-width: 1200px;
-  margin: 0 auto;
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
+// Stats Row
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: $spacing-4;
+  margin-bottom: $spacing-6;
+}
+
+.stat-card {
+  @include glass(0.15, 0.05);
+  border-radius: $radius-2xl;
+  padding: $spacing-4;
+  display: flex;
+  align-items: center;
+  gap: $spacing-4;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all $transition-duration-base $transition-easing;
+
+  body.light & {
+    border-color: rgba(0, 0, 0, 0.1);
+  }
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: $shadow-md;
+  }
+
+  &.warning {
+    border-color: rgba($status-overdue, 0.3);
+
+    .stat-icon.overdue {
+      background: rgba($status-overdue, 0.2);
+      color: $status-overdue;
+    }
+
+    .stat-value {
+      color: $status-overdue;
+    }
+  }
+}
+
+.stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: $radius-xl;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &.projects {
+    background: rgba($color-accent, 0.2);
+    color: $color-accent;
+  }
+
+  &.tasks {
+    background: rgba(#3b82f6, 0.2);
+    color: #3b82f6;
+  }
+
+  &.completed {
+    background: rgba($status-done, 0.2);
+    color: $status-done;
+  }
+
+  &.overdue {
+    background: rgba($status-overdue, 0.15);
+    color: $status-overdue;
+  }
+}
+
+.stat-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stat-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: $text-primary-dark;
+  line-height: 1;
+
+  body.light & {
+    color: $text-primary-light;
+  }
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  color: $text-secondary-dark;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+
+  body.light & {
+    color: $text-secondary-light;
+  }
+}
+
+// Dashboard Grid
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: $spacing-4;
+  margin-bottom: $spacing-6;
+}
+
+.dashboard-card {
+  @include glass(0.15, 0.05);
+  border-radius: $radius-2xl;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+
+  body.light & {
+    border-color: rgba(0, 0, 0, 0.1);
+  }
+
+  &.overdue-card {
+    border-color: rgba($status-overdue, 0.3);
+
+    .card-header h2 {
+      color: $status-overdue;
+    }
+  }
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-4;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+
+  body.light & {
+    border-color: rgba(0, 0, 0, 0.08);
+  }
+
+  h2 {
+    display: flex;
+    align-items: center;
+    gap: $spacing-2;
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: $text-primary-dark;
+
+    body.light & {
+      color: $text-primary-light;
+    }
+
+    svg {
+      opacity: 0.7;
+    }
+  }
+}
+
+.see-all {
+  font-size: 0.75rem;
+  color: $color-accent;
+  cursor: pointer;
+  transition: opacity $transition-duration-base $transition-easing;
+
+  &:hover {
+    opacity: 0.8;
+  }
+}
+
+.card-content {
+  padding: $spacing-3;
+}
+
+.empty-state {
+  padding: $spacing-4;
+  text-align: center;
+  color: $text-secondary-dark;
+
+  body.light & {
+    color: $text-secondary-light;
+  }
+
+  p {
+    margin: 0 0 $spacing-1;
+    font-size: 0.875rem;
+  }
+
+  span {
+    font-size: 0.75rem;
+    opacity: 0.7;
+  }
+}
+
+// Project Item
+.project-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-3;
+  border-radius: $radius-lg;
+  cursor: pointer;
+  transition: all $transition-duration-base $transition-easing;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.05);
+
+    body.light & {
+      background: rgba(0, 0, 0, 0.03);
+    }
+
+    svg {
+      transform: translateX(4px);
+    }
+  }
+
+  svg {
+    color: $text-secondary-dark;
+    transition: transform $transition-duration-base $transition-easing;
+
+    body.light & {
+      color: $text-secondary-light;
+    }
+  }
+}
+
+.project-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.project-name {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: $text-primary-dark;
+
+  body.light & {
+    color: $text-primary-light;
+  }
+}
+
+.project-meta {
+  font-size: 0.6875rem;
+  color: $text-secondary-dark;
+
+  body.light & {
+    color: $text-secondary-light;
+  }
+}
+
+// Task Item
+.task-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-3;
+  border-radius: $radius-lg;
+
+  &:not(:last-child) {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+
+    body.light & {
+      border-color: rgba(0, 0, 0, 0.05);
+    }
+  }
+
+  &.overdue {
+    background: rgba($status-overdue, 0.08);
+  }
+}
+
+.task-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.task-name {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: $text-primary-dark;
+
+  body.light & {
+    color: $text-primary-light;
+  }
+}
+
+.task-project {
+  font-size: 0.6875rem;
+  color: $text-secondary-dark;
+
+  body.light & {
+    color: $text-secondary-light;
+  }
+}
+
+.task-due {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: $radius-full;
+  background: rgba(255, 255, 255, 0.08);
+  color: $text-secondary-dark;
+
+  body.light & {
+    background: rgba(0, 0, 0, 0.06);
+    color: $text-secondary-light;
+  }
+
+  &.soon {
+    background: rgba(#f59e0b, 0.2);
+    color: #f59e0b;
+  }
+
+  &.overdue {
+    background: rgba($status-overdue, 0.2);
+    color: $status-overdue;
+  }
+}
+
+// Quick Actions
+.quick-actions {
+  h3 {
+    margin: 0 0 $spacing-3;
+    font-size: 1rem;
+    font-weight: 600;
+    color: $text-primary-dark;
+
+    body.light & {
+      color: $text-primary-light;
+    }
+  }
+}
+
+.actions-grid {
+  display: flex;
+  gap: $spacing-3;
+  flex-wrap: wrap;
+}
+
+.quick-action {
+  @include glass(0.15, 0.05);
+  display: flex;
+  align-items: center;
+  gap: $spacing-3;
+  padding: $spacing-3 $spacing-4;
+  border-radius: $radius-xl;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  color: $text-primary-dark;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all $transition-duration-base $transition-easing;
+
+  body.light & {
+    border-color: rgba(0, 0, 0, 0.1);
+    color: $text-primary-light;
+  }
+
+  &:hover {
+    border-color: rgba($color-accent, 0.3);
+    transform: translateY(-2px);
+
+    .action-icon {
+      background: rgba($color-accent, 0.2);
+      color: $color-accent;
+    }
+  }
+}
+
+.action-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: $radius-lg;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.08);
+  transition: all $transition-duration-base $transition-easing;
+
+  body.light & {
+    background: rgba(0, 0, 0, 0.05);
+  }
+}
