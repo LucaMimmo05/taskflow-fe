@@ -19,7 +19,7 @@ export class Sidebar implements OnInit {
   loadingProjects = true;
 
   menuItems = [
-    { icon: 'home', label: 'Home', route: '/home' },
+    { icon: 'home', label: 'Home', route: '/' },
     { icon: 'folder', label: 'Progetti', route: '/projects' },
     { icon: 'check-square', label: 'Task', route: '/tasks' },
     { icon: 'calendar', label: 'Calendario', route: '/calendar' },
