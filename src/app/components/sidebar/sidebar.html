@@ -39,6 +39,11 @@
                             <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z">
                             </path>
                         </svg>
+                        <svg *ngIf="item.icon === 'check-square'" class="nav-icon" width="20" height="20"
+                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="9 11 12 14 22 4"></polyline>
+                            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                        </svg>
                         <svg *ngIf="item.icon === 'star'" class="nav-icon" width="20" height="20" viewBox="0 0 24 24"
                             fill="none" stroke="currentColor" stroke-width="2">
                             <polygon
@@ -53,19 +58,32 @@
 
         <div class="nav-section">
             <div class="nav-section-header">
-                <span class="section-title">Progetti</span>
-                <button class="add-project-btn" aria-label="Aggiungi progetto">
+                <span class="section-title">I miei progetti</span>
+                <button class="add-project-btn" (click)="goToAllProjects()" aria-label="Vedi tutti i progetti">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <line x1="12" y1="5" x2="12" y2="19"></line>
                         <line x1="5" y1="12" x2="19" y2="12"></line>
                     </svg>
                 </button>
             </div>
-            <ul class="nav-list">
-                <li *ngFor="let project of projects" class="nav-item">
-                    <a [routerLink]="'/project/' + project.id" routerLinkActive="active" class="nav-link project-link">
-                        <span class="project-color" [style.background-color]="project.color"></span>
-                        <span class="nav-label">{{ project.name }}</span>
+
+            <!-- Loading State -->
+            <div *ngIf="loadingProjects" class="projects-loading">
+                <div class="mini-spinner"></div>
+            </div>
+
+            <!-- Empty State -->
+            <div *ngIf="!loadingProjects && projects.length === 0" class="projects-empty">
+                <span>Nessun progetto</span>
+            </div>
+
+            <!-- Projects List -->
+            <ul class="nav-list" *ngIf="!loadingProjects && projects.length > 0">
+                <li *ngFor="let project of projects; let i = index" class="nav-item">
+                    <a class="nav-link project-link" (click)="goToProject(project)">
+                        <span class="project-color" [style.background-color]="getProjectColor(i)"></span>
+                        <span class="nav-label project-name">{{ project.title }}</span>
+                        <span class="project-task-count" *ngIf="project.phases">{{ project.phases.length }}</span>
                     </a>
                 </li>
             </ul>

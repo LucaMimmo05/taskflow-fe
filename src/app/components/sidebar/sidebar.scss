@@ -18,21 +18,17 @@
   z-index: 100;
   overflow-y: auto;
   overflow-x: hidden;
-  box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.3),
-    0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
 
   body.light & {
     border-color: rgba(0, 0, 0, 0.1);
-    box-shadow: 
-      0 8px 32px rgba(0, 0, 0, 0.1),
-      0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.5) inset;
   }
 
   @media (max-width: $breakpoint-lg) {
     transform: translateX(calc(-100% - #{$spacing-3}));
     transition: transform 0.3s $transition-easing-in-out;
-    
+
     &.open {
       transform: translateX(0);
     }
@@ -40,12 +36,12 @@
 }
 
 .sidebar-header {
-  padding: $spacing-6;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: $spacing-4 $spacing-4 $spacing-3;
   display: flex;
   justify-content: center;
   align-items: center;
-  
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
   body.light & {
     border-bottom-color: rgba(0, 0, 0, 0.1);
   }
@@ -202,12 +198,71 @@
   font-weight: 500;
 }
 
+/* Project Link Styles */
 .project-link {
+  cursor: pointer;
+
   .project-color {
     width: 8px;
     height: 8px;
     border-radius: 50%;
     flex-shrink: 0;
+  }
+
+  .project-name {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.project-task-count {
+  font-size: 0.6875rem;
+  padding: 2px 6px;
+  border-radius: $radius-full;
+  background: rgba(255, 255, 255, 0.08);
+  color: $text-secondary-dark;
+
+  body.light & {
+    background: rgba(0, 0, 0, 0.06);
+    color: $text-secondary-light;
+  }
+}
+
+/* Loading & Empty States */
+.projects-loading {
+  display: flex;
+  justify-content: center;
+  padding: $spacing-4;
+}
+
+.mini-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-top-color: $color-accent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.projects-empty {
+  padding: $spacing-3 $spacing-4;
+  text-align: center;
+
+  span {
+    font-size: 0.75rem;
+    color: $text-secondary-dark;
+
+    body.light & {
+      color: $text-secondary-light;
+    }
   }
 }
 
@@ -215,7 +270,7 @@
   padding: $spacing-4;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   position: relative;
-  
+
   body.light & {
     border-top-color: rgba(0, 0, 0, 0.1);
   }
@@ -318,18 +373,14 @@
   border-radius: $radius-2xl;
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.4),
-    0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1) inset;
   z-index: 200;
   animation: slideUp 0.2s $transition-easing-out;
   overflow: hidden;
 
   body.light & {
     border-color: rgba(0, 0, 0, 0.15);
-    box-shadow: 
-      0 8px 32px rgba(0, 0, 0, 0.15),
-      0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.8) inset;
   }
 }
 
@@ -494,4 +545,3 @@
   color: $color-accent;
   flex-shrink: 0;
 }
-
