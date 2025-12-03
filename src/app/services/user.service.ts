@@ -14,10 +14,7 @@ import { AuthService } from './auth.service';
 export class UserService {
   private readonly apiUrl = 'http://localhost:8080/api/user';
 
-  constructor(
-    private http: HttpClient,
-    private authService: AuthService
-  ) {}
+  constructor(private http: HttpClient, private authService: AuthService) {}
 
   /**
    * Crea gli headers HTTP con il token di autenticazione
@@ -39,7 +36,7 @@ export class UserService {
    */
   updateProfile(updates: UpdateUserRequest): Observable<UserResponse> {
     return this.http.put<UserResponse>(this.apiUrl, updates, {
-      headers: this.getHeaders()
+      headers: this.getHeaders(),
     });
   }
 
@@ -50,7 +47,7 @@ export class UserService {
    */
   updateSettings(settings: UpdateSettingsRequest): Observable<{ message: string }> {
     return this.http.put<{ message: string }>(`${this.apiUrl}/settings`, settings, {
-      headers: this.getHeaders()
+      headers: this.getHeaders(),
     });
   }
 
@@ -60,7 +57,19 @@ export class UserService {
    */
   deleteAccount(): Observable<{ message: string }> {
     return this.http.delete<{ message: string }>(this.apiUrl, {
-      headers: this.getHeaders()
+      headers: this.getHeaders(),
+    });
+  }
+
+  /**
+   * Cerca un utente per email
+   * @param email Email dell'utente da cercare
+   * @returns Observable con i dati dell'utente
+   */
+  getUserByEmail(email: string): Observable<UserResponse> {
+    return this.http.get<UserResponse>(`${this.apiUrl}/search`, {
+      headers: this.getHeaders(),
+      params: { email },
     });
   }
 }
