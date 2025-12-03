@@ -79,14 +79,18 @@ export class ProjectsPage implements OnInit {
     this.projectService.getProjects().subscribe({
       next: (data) => {
         this.projects = data;
-        this.loadTaskStats();
+        this.loading = false;
       },
       error: (err) => {
-        this.error = 'Errore nel caricamento progetti';
-        this.loading = false;
-        console.error(err);
+        this.handleError('Errore nel caricamento progetti', err);
       },
     });
+  }
+
+  private handleError(message: string, err: any): void {
+    this.error = message;
+    this.loading = false;
+    console.error(err);
   }
 
   loadTaskStats(): void {
