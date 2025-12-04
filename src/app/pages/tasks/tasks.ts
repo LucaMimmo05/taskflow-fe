@@ -4,6 +4,7 @@ import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { TaskService } from '../../services/task.service';
 import { ProjectService } from '../../services/project.service';
+import { AuthService } from '../../services/auth.service';
 import { Task } from '../../models/task.model';
 import { Project } from '../../models/project.model';
 import { forkJoin, Observable, catchError } from 'rxjs';
@@ -38,6 +39,7 @@ export class TasksPage implements OnInit {
   constructor(
     private taskService: TaskService,
     private projectService: ProjectService,
+    private authService: AuthService,
     private router: Router,
     private route: ActivatedRoute
   ) {}
@@ -55,6 +57,11 @@ export class TasksPage implements OnInit {
   loadData(): void {
     this.loading = true;
     this.error = null;
+    
+    // Get current user ID
+    const currentUser = this.authService.getCurrentUser();
+    const currentUserId = currentUser?.id;
+
     this.projectService.getProjects().subscribe({
       next: (projects) => {
         this.projects = projects;
@@ -83,11 +90,17 @@ export class TasksPage implements OnInit {
               const project = projects[index];
               if (Array.isArray(tasks)) {
                 tasks.forEach((task) => {
-                  this.allTasks.push({
-                    ...task,
-                    projectTitle: project.title,
-                    projectColor: this.projectColors[index % this.projectColors.length],
-                  });
+                  // Filter: show only tasks assigned to current user OR unassigned tasks
+                  const isAssignedToMe = currentUserId && task.assignees?.some(a => a.userId === currentUserId);
+                  const isUnassigned = !task.assignees || task.assignees.length === 0;
+                  
+                  if (isAssignedToMe || isUnassigned) {
+                    this.allTasks.push({
+                      ...task,
+                      projectTitle: project.title,
+                      projectColor: this.projectColors[index % this.projectColors.length],
+                    });
+                  }
                 });
               }
             });
