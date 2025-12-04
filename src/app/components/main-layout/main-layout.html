@@ -1,9 +1,26 @@
 <div class="app-container">
     <app-sidebar></app-sidebar>
-    <div class="app-main">
-        <app-topbar></app-topbar>
+    <div class="app-main" [class.sidebar-collapsed]="isSidebarCollapsed">
+        <!-- Hamburger Button (Mobile Only) -->
+        <button class="mobile-hamburger" (click)="toggleMobileMenu()" *ngIf="isMobile" aria-label="Apri menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </button>
+
+        <!-- Topbar (Desktop Only) -->
+        <app-topbar *ngIf="!isMobile"></app-topbar>
+        
         <main class="app-content">
             <router-outlet></router-outlet>
         </main>
     </div>
+
+    <!-- Mobile Menu -->
+    <app-mobile-menu [isOpen]="isMobileMenuOpen" (closeMenu)="closeMobileMenu()"></app-mobile-menu>
+    
+    <!-- Overlay to close menu on click outside -->
+    <div class="mobile-menu-backdrop" *ngIf="isMobileMenuOpen" (click)="closeMobileMenu()"></div>
 </div>
