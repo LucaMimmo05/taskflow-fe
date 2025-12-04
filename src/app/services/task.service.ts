@@ -12,7 +12,7 @@ import { AuthService } from './auth.service';
   providedIn: 'root',
 })
 export class TaskService {
-  private readonly apiUrl = 'http://localhost:8080/api/task';
+  private readonly taskApiUrl = 'http://localhost:8080/api/task';
 
   constructor(
     private http: HttpClient,
@@ -38,7 +38,7 @@ export class TaskService {
    * @returns Observable con array di task
    */
   getTasksByProject(projectId: string): Observable<Task[]> {
-    return this.http.get<Task[]>(`${this.apiUrl}/${projectId}`, {
+    return this.http.get<Task[]>(`${this.taskApiUrl}/${projectId}`, {
       headers: this.getHeaders()
     });
   }
@@ -50,7 +50,7 @@ export class TaskService {
    * @returns Observable con il task creato
    */
   createTask(projectId: string, task: CreateTaskRequest): Observable<Task> {
-    return this.http.post<Task>(`${this.apiUrl}/${projectId}`, task, {
+    return this.http.post<Task>(`${this.taskApiUrl}/${projectId}`, task, {
       headers: this.getHeaders()
     });
   }
@@ -62,7 +62,7 @@ export class TaskService {
    * @returns Observable con il task aggiornato
    */
   updateTask(taskId: string, updates: UpdateTaskRequest): Observable<Task> {
-    return this.http.put<Task>(`${this.apiUrl}/${taskId}`, updates, {
+    return this.http.put<Task>(`${this.taskApiUrl}/${taskId}`, updates, {
       headers: this.getHeaders()
     });
   }
@@ -73,7 +73,7 @@ export class TaskService {
    * @returns Observable con messaggio di conferma
    */
   deleteTask(taskId: string): Observable<{ message: string }> {
-    return this.http.delete<{ message: string }>(`${this.apiUrl}/${taskId}`, {
+    return this.http.delete<{ message: string }>(`${this.taskApiUrl}/${taskId}`, {
       headers: this.getHeaders()
     });
   }
