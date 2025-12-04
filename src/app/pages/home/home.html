@@ -35,8 +35,9 @@
     <!-- Dashboard Content -->
     @if (!loading) {
         <div class="dashboard-content">
-        <!-- Stats Cards -->
+        <!-- Stats Cards - Single Row -->
         <div class="stats-row">
+            <!-- Left side with background -->
             <div class="stat-card clickable" (click)="goToProjects()">
                 <div class="stat-icon projects">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -62,7 +63,8 @@
                 </div>
             </div>
 
-            <div class="stat-card">
+            <!-- Right side without background -->
+            <div class="stat-card stat-card-transparent">
                 <div class="stat-icon completed">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="12" cy="12" r="10" />
@@ -70,12 +72,12 @@
                     </svg>
                 </div>
                 <div class="stat-info">
-                    <span class="stat-value">{{ getCompletionRate() }}%</span>
+                    <span class="stat-value">{{ stats.completedTasks }}</span>
                     <span class="stat-label">Completate</span>
                 </div>
             </div>
 
-            <div class="stat-card" [class.warning]="stats.overdueTasks > 0">
+            <div class="stat-card stat-card-transparent" [class.warning]="stats.overdueTasks > 0">
                 <div class="stat-icon overdue">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="12" cy="12" r="10" />

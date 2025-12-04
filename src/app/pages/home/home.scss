@@ -93,12 +93,20 @@
   }
 }
 
-// Stats Row
+// Stats Row - Single row with 4 cards
 .stats-row {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: $spacing-4;
   margin-bottom: $spacing-6;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
 }
 
 .stat-card {
@@ -115,6 +123,12 @@
     border-color: rgba(0, 0, 0, 0.1);
   }
 
+  &.stat-card-transparent {
+    background: transparent;
+    border: none;
+    backdrop-filter: none;
+  }
+
   &.clickable {
     cursor: pointer;
 
@@ -127,11 +141,6 @@
     &:active {
       transform: translateY(-2px);
     }
-  }
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: $shadow-md;
   }
 
   &.warning {
