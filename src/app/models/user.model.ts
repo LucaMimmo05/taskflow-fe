@@ -36,6 +36,7 @@ export interface UserResponse {
   displayName: string;
   email: string;
   notifyOnDue: boolean;
+  avatarUrl?: string;
 }
 
 /**

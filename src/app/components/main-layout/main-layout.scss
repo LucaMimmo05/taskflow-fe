@@ -30,6 +30,10 @@
     margin-left: 0;
     padding-top: 0;
   }
+
+  &.sidebar-collapsed {
+    margin-left: calc(80px + #{$spacing-3} * 2);
+  }
 }
 
 .app-content {
@@ -37,4 +41,64 @@
   overflow-y: auto;
   position: relative;
   padding-top: 20px;
+
+  @media (max-width: $breakpoint-lg) {
+    padding-top: 80px; // Spazio per hamburger button
+  }
+}
+
+.mobile-hamburger {
+  position: fixed;
+  top: $spacing-3;
+  left: $spacing-3;
+  z-index: 100;
+  width: 48px;
+  height: 48px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: $radius-xl;
+  color: $text-primary-dark;
+  cursor: pointer;
+  transition: all 0.2s $transition-easing-in-out;
+  @include glass(0.15, 0.05);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+
+  body.light & {
+    background: rgba(255, 255, 255, 0.4);
+    border-color: rgba(0, 0, 0, 0.1);
+    color: $text-primary-light;
+  }
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: scale(1.05);
+
+    body.light & {
+      background: rgba(255, 255, 255, 0.6);
+    }
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+
+  @media (max-width: $breakpoint-lg) {
+    display: flex;
+  }
+}
+
+.mobile-menu-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  z-index: 999;
 }
