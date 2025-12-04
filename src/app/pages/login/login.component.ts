@@ -80,7 +80,7 @@ export class LoginComponent {
     this.authService.login(loginRequest).subscribe({
       next: () => {
         // AuthService salva automaticamente i token
-        this.router.navigate(['/home']);
+        this.router.navigate(['/']);
       },
       error: (error) => {
         this.isSubmitting = false;

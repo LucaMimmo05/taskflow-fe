@@ -1,8 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
+import { forkJoin } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
 import { ProjectService } from '../../services/project.service';
+import { TaskService } from '../../services/task.service';
+import { SidebarService } from '../../services/sidebar.service';
 import { UserResponse } from '../../models/user.model';
 import { Project } from '../../models/project.model';
 
@@ -16,7 +19,11 @@ import { Project } from '../../models/project.model';
 export class Sidebar implements OnInit {
   user: UserResponse | null = null;
   projects: Project[] = [];
+  projectTaskCounts: Map<string, number> = new Map();
   loadingProjects = true;
+  isCollapsed = false;
+  showSettingsPopup = false;
+  notificationsEnabled = true;
 
   menuItems = [
     { icon: 'home', label: 'Home', route: '/' },
@@ -31,12 +38,23 @@ export class Sidebar implements OnInit {
   constructor(
     private authService: AuthService,
     private projectService: ProjectService,
-    private router: Router
+    private taskService: TaskService,
+    private router: Router,
+    private sidebarService: SidebarService,
+    private elementRef: ElementRef
   ) {}
 
   ngOnInit(): void {
     this.user = this.authService.getCurrentUser();
     this.loadProjects();
+    this.sidebarService.isCollapsed$.subscribe((collapsed) => {
+      this.isCollapsed = collapsed;
+    });
+    // Carica lo stato delle notifiche
+    const savedNotifications = localStorage.getItem('notificationsEnabled');
+    if (savedNotifications !== null) {
+      this.notificationsEnabled = savedNotifications === 'true';
+    }
   }
 
   loadProjects(): void {
@@ -44,12 +62,34 @@ export class Sidebar implements OnInit {
     this.projectService.getProjects().subscribe({
       next: (projects) => {
         this.projects = projects;
+        this.loadTaskCounts(projects);
         this.loadingProjects = false;
       },
       error: () => {
         this.loadingProjects = false;
       },
     });
+  }
+
+  loadTaskCounts(projects: Project[]): void {
+    if (projects.length === 0) return;
+
+    const taskRequests = projects.map((project) => this.taskService.getTasksByProject(project.id));
+
+    forkJoin(taskRequests).subscribe({
+      next: (tasksArrays) => {
+        tasksArrays.forEach((tasks, index) => {
+          this.projectTaskCounts.set(projects[index].id, tasks.length);
+        });
+      },
+      error: () => {
+        // In caso di errore, non mostrare il conteggio
+      },
+    });
+  }
+
+  getTaskCount(projectId: string): number {
+    return this.projectTaskCounts.get(projectId) || 0;
   }
 
   getProjectColor(index: number): string {
@@ -72,5 +112,53 @@ export class Sidebar implements OnInit {
       .join('')
       .toUpperCase()
       .slice(0, 2);
+  }
+
+  toggleCollapse(): void {
+    this.sidebarService.toggle();
+  }
+
+  toggleSettingsPopup(event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+    }
+    this.showSettingsPopup = !this.showSettingsPopup;
+  }
+
+  closeSettingsPopup(): void {
+    this.showSettingsPopup = false;
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: Event): void {
+    if (!this.showSettingsPopup) {
+      return;
+    }
+
+    const target = event.target as HTMLElement;
+    const clickedInsidePopup = target.closest('.settings-popup');
+    const clickedOnButton = target.closest('.user-menu-btn');
+
+    // Chiudi solo se il click è fuori dal popup e fuori dal bottone
+    if (!clickedInsidePopup && !clickedOnButton) {
+      this.showSettingsPopup = false;
+    }
+  }
+
+  logout(): void {
+    this.authService.logout();
+    this.router.navigate(['/login']);
+    this.closeSettingsPopup();
+  }
+
+  goToProfile(): void {
+    this.router.navigate(['/profile']);
+    this.closeSettingsPopup();
+  }
+
+  toggleNotifications(): void {
+    this.notificationsEnabled = !this.notificationsEnabled;
+    // Salva la preferenza nel localStorage
+    localStorage.setItem('notificationsEnabled', this.notificationsEnabled.toString());
   }
 }

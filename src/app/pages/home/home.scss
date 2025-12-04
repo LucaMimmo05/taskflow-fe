@@ -5,6 +5,10 @@
   padding: $spacing-4;
   height: 100%;
   overflow-y: auto;
+
+  @media (max-width: $breakpoint-lg) {
+    padding-top: $spacing-2; // Ridotto padding-top su mobile per compensare il padding del contenitore
+  }
 }
 
 // Dashboard Header
@@ -15,6 +19,10 @@
   margin-bottom: $spacing-6;
   gap: $spacing-4;
   flex-wrap: wrap;
+
+  @media (max-width: $breakpoint-lg) {
+    margin-top: $spacing-2; // Spazio aggiuntivo su mobile
+  }
 }
 
 .greeting {
@@ -27,6 +35,11 @@
 
     body.light & {
       color: $text-primary-light;
+    }
+
+    @media (max-width: $breakpoint-lg) {
+      font-size: 1.5rem; // Font più piccolo su mobile
+      padding-left: 0; // Assicura che non ci sia padding che interferisca
     }
   }
 
@@ -44,6 +57,11 @@
 .header-actions {
   display: flex;
   gap: $spacing-2;
+
+  @media (max-width: $breakpoint-lg) {
+    width: 100%; // I bottoni vanno a capo su mobile
+    margin-top: $spacing-3;
+  }
 }
 
 .action-btn {
@@ -93,12 +111,20 @@
   }
 }
 
-// Stats Row
+// Stats Row - Single row with 4 cards
 .stats-row {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: $spacing-4;
   margin-bottom: $spacing-6;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
 }
 
 .stat-card {
@@ -115,9 +141,24 @@
     border-color: rgba(0, 0, 0, 0.1);
   }
 
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: $shadow-md;
+  &.stat-card-transparent {
+    background: transparent;
+    border: none;
+    backdrop-filter: none;
+  }
+
+  &.clickable {
+    cursor: pointer;
+
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow: $shadow-lg;
+      border-color: rgba($color-accent, 0.3);
+    }
+
+    &:active {
+      transform: translateY(-2px);
+    }
   }
 
   &.warning {

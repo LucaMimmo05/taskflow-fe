@@ -56,25 +56,72 @@
         </div>
 
         <!-- Labels -->
-        <div class="project-labels" *ngIf="project.labels.length > 0">
-            <span *ngFor="let label of project.labels" class="label-badge" [style.background-color]="label.color">
-                {{ label.title }}
-            </span>
+        <div class="project-labels-section">
+            <div class="labels-header">
+                <span class="labels-title">Etichette</span>
+                <button class="manage-btn" (click)="openLabelsModal()" title="Gestisci etichette">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="1"></circle>
+                        <circle cx="19" cy="12" r="1"></circle>
+                        <circle cx="5" cy="12" r="1"></circle>
+                    </svg>
+                </button>
+            </div>
+            <div class="project-labels" *ngIf="project.labels.length > 0">
+                <span *ngFor="let label of project.labels" class="label-badge" [style.background-color]="label.color">
+                    {{ label.title }}
+                </span>
+            </div>
+            <span *ngIf="project.labels.length === 0" class="no-labels">Nessuna etichetta</span>
         </div>
 
         <!-- Kanban Board -->
         <div class="kanban-board">
-            <div *ngFor="let phase of project.phases" class="kanban-column">
+            <div *ngFor="let phase of project.phases | orderBy:'position'" class="kanban-column">
                 <div class="column-header">
-                    <h3 class="column-title">{{ phase.title }}</h3>
-                    <span class="task-count">{{ getTasksByPhase(phase.id).length }}</span>
-                    <button class="add-task-btn" (click)="openCreateTaskModal(phase.id)" title="Aggiungi task">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <line x1="12" y1="5" x2="12" y2="19" />
-                            <line x1="5" y1="12" x2="19" y2="12" />
-                        </svg>
-                    </button>
+                    <div class="column-title-row">
+                        <button class="move-btn" (click)="movePhaseLeft(phase)" [disabled]="getPhaseIndex(phase) === 0"
+                            title="Sposta a sinistra">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M15 18l-6-6 6-6" />
+                            </svg>
+                        </button>
+                        <h3 class="column-title">{{ phase.title }}</h3>
+                        <button class="move-btn" (click)="movePhaseRight(phase)"
+                            [disabled]="getPhaseIndex(phase) === project.phases.length - 1" title="Sposta a destra">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M9 18l6-6-6-6" />
+                            </svg>
+                        </button>
+                        <span class="task-count">{{ getTasksByPhase(phase.id).length }}</span>
+                    </div>
+                    <div class="column-actions">
+                        <button class="column-action-btn" (click)="openEditPhaseModal(phase)" title="Modifica fase">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                            </svg>
+                        </button>
+                        <button class="column-action-btn danger" (click)="confirmDeletePhase(phase)"
+                            title="Elimina fase" [disabled]="project.phases.length <= 1">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M3 6h18"></path>
+                                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                            </svg>
+                        </button>
+                        <button class="add-task-btn" (click)="openCreateTaskModal(phase.id)" title="Aggiungi task">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <line x1="12" y1="5" x2="12" y2="19" />
+                                <line x1="5" y1="12" x2="19" y2="12" />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
                 <div class="column-tasks">
                     <div *ngFor="let task of getTasksByPhase(phase.id)" class="task-card"
@@ -121,6 +168,18 @@
                     <div *ngIf="getTasksByPhase(phase.id).length === 0" class="empty-column">
                         <p>Nessuna task</p>
                     </div>
+                </div>
+            </div>
+
+            <!-- Add Phase Column (max 4 phases) -->
+            <div class="add-phase-column" *ngIf="project.phases.length < MAX_PHASES" (click)="openCreatePhaseModal()">
+                <div class="add-phase-content">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="5" x2="12" y2="19" />
+                        <line x1="5" y1="12" x2="19" y2="12" />
+                    </svg>
+                    <span>Aggiungi Fase</span>
+                    <span class="phase-count">{{ project.phases.length }}/{{ MAX_PHASES }}</span>
                 </div>
             </div>
         </div>
@@ -297,6 +356,173 @@
             <div class="modal-footer">
                 <button class="secondary" (click)="closeCollaboratorsModal()"
                     [disabled]="addingCollaborator">Chiudi</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Phase Edit Modal -->
+    <div class="modal-backdrop" *ngIf="showPhaseModal">
+        <div class="modal modal-sm">
+            <div class="modal-header">
+                <h2>{{ editingPhase ? 'Modifica Fase' : 'Nuova Fase' }}</h2>
+                <button class="close-btn" (click)="closePhaseModal()" [disabled]="savingPhase">×</button>
+            </div>
+            <div class="modal-body">
+                <div *ngIf="error" class="error mb">{{ error }}</div>
+                <label class="field">
+                    <span>Nome Fase *</span>
+                    <input type="text" [(ngModel)]="phaseForm.title" placeholder="Nome della fase" />
+                </label>
+            </div>
+            <div class="modal-footer">
+                <button class="secondary" (click)="closePhaseModal()" [disabled]="savingPhase">Annulla</button>
+                <button class="primary" (click)="submitPhase()" [disabled]="savingPhase">
+                    <span *ngIf="!savingPhase">{{ editingPhase ? 'Salva' : 'Crea' }}</span>
+                    <span *ngIf="savingPhase">Salvataggio...</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Phase Confirmation -->
+    <div class="modal-backdrop" *ngIf="showDeletePhaseConfirm">
+        <div class="modal modal-sm">
+            <div class="modal-header">
+                <h2>Elimina Fase</h2>
+                <button class="close-btn" (click)="cancelDeletePhase()" [disabled]="deletingPhase">×</button>
+            </div>
+            <div class="modal-body">
+                <p>Sei sicuro di voler eliminare la fase "<strong>{{ phaseToDelete?.title }}</strong>"?</p>
+                <p class="warning" *ngIf="getTasksByPhase(phaseToDelete?.id || '').length > 0">
+                    Attenzione: {{ getTasksByPhase(phaseToDelete?.id || '').length }} task verranno spostate nella prima
+                    fase disponibile.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button class="secondary" (click)="cancelDeletePhase()" [disabled]="deletingPhase">Annulla</button>
+                <button class="danger" (click)="deletePhase()" [disabled]="deletingPhase">
+                    <span *ngIf="!deletingPhase">Elimina</span>
+                    <span *ngIf="deletingPhase">Eliminazione...</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Labels Management Modal -->
+    <div class="modal-backdrop" *ngIf="showLabelsModal">
+        <div class="modal labels-modal">
+            <div class="modal-header">
+                <h2>Gestisci Etichette</h2>
+                <button class="close-btn" (click)="closeLabelsModal()" [disabled]="savingLabel">×</button>
+            </div>
+            <div class="modal-body">
+                <div *ngIf="error" class="error mb">{{ error }}</div>
+
+                <!-- Add Label Form - Simplified -->
+                <div class="add-label-row">
+                    <div class="label-preview-small" [style.background-color]="labelForm.color">
+                        {{ labelForm.title || '...' }}
+                    </div>
+                    <input type="text" [(ngModel)]="labelForm.title" placeholder="Nome etichetta"
+                        [disabled]="savingLabel" class="label-input" />
+                    <input type="color" [(ngModel)]="labelForm.color" [disabled]="savingLabel" class="color-input" />
+                    <button class="btn-add" (click)="addLabel()" [disabled]="savingLabel || !labelForm.title.trim()">
+                        <svg *ngIf="!savingLabel" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19" />
+                            <line x1="5" y1="12" x2="19" y2="12" />
+                        </svg>
+                        <span *ngIf="savingLabel" class="mini-spinner"></span>
+                    </button>
+                </div>
+
+                <!-- Preset Colors -->
+                <div class="preset-colors-row">
+                    <button *ngFor="let color of presetColors" class="preset-dot" [style.background-color]="color"
+                        [class.selected]="labelForm.color === color" (click)="labelForm.color = color"
+                        type="button"></button>
+                </div>
+
+                <!-- Labels List -->
+                <div class="labels-list-container" *ngIf="project && project.labels.length > 0">
+                    <div *ngFor="let label of project.labels" class="label-row">
+                        <div class="label-badge" [style.background-color]="label.color">
+                            {{ label.title }}
+                        </div>
+                        <div class="label-row-actions">
+                            <button class="btn-icon" (click)="openEditLabelModal(label)" title="Modifica">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                                </svg>
+                            </button>
+                            <button class="btn-icon danger" (click)="confirmDeleteLabel(label)" title="Elimina">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M3 6h18"></path>
+                                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div *ngIf="project && project.labels.length === 0" class="empty-labels">
+                    <p>Nessuna etichetta</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="secondary" (click)="closeLabelsModal()" [disabled]="savingLabel">Chiudi</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Label Modal -->
+    <div class="modal-backdrop" *ngIf="showEditLabelModal">
+        <div class="modal modal-sm">
+            <div class="modal-header">
+                <h2>Modifica Etichetta</h2>
+                <button class="close-btn" (click)="closeEditLabelModal()" [disabled]="savingLabel">×</button>
+            </div>
+            <div class="modal-body">
+                <div *ngIf="error" class="error mb">{{ error }}</div>
+                <label class="field">
+                    <span>Nome *</span>
+                    <input type="text" [(ngModel)]="editLabelForm.title" placeholder="Nome etichetta" />
+                </label>
+                <label class="field">
+                    <span>Colore</span>
+                    <input type="color" [(ngModel)]="editLabelForm.color" class="color-picker-lg" />
+                </label>
+            </div>
+            <div class="modal-footer">
+                <button class="secondary" (click)="closeEditLabelModal()" [disabled]="savingLabel">Annulla</button>
+                <button class="primary" (click)="submitEditLabel()" [disabled]="savingLabel">
+                    <span *ngIf="!savingLabel">Salva</span>
+                    <span *ngIf="savingLabel">Salvataggio...</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Label Confirmation -->
+    <div class="modal-backdrop" *ngIf="showDeleteLabelConfirm">
+        <div class="modal modal-sm">
+            <div class="modal-header">
+                <h2>Elimina Etichetta</h2>
+                <button class="close-btn" (click)="cancelDeleteLabel()" [disabled]="deletingLabel">×</button>
+            </div>
+            <div class="modal-body">
+                <p>Sei sicuro di voler eliminare l'etichetta "<strong>{{ labelToDelete?.title }}</strong>"?</p>
+                <p class="warning">L'etichetta verrà rimossa da tutte le task associate.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="secondary" (click)="cancelDeleteLabel()" [disabled]="deletingLabel">Annulla</button>
+                <button class="danger" (click)="deleteLabel()" [disabled]="deletingLabel">
+                    <span *ngIf="!deletingLabel">Elimina</span>
+                    <span *ngIf="deletingLabel">Eliminazione...</span>
+                </button>
             </div>
         </div>
     </div>

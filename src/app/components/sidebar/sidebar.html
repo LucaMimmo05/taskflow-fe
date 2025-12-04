@@ -1,65 +1,90 @@
-<aside class="sidebar">
+<aside class="sidebar" [class.collapsed]="isCollapsed">
     <div class="sidebar-header">
         <div class="sidebar-logo">
             <img src="/assets/logo.png" alt="TaskFlow" class="logo-img" />
             <span class="logo-text">TaskFlow</span>
         </div>
+        <button class="collapse-btn" (click)="toggleCollapse()"
+            [attr.aria-label]="isCollapsed ? 'Espandi sidebar' : 'Collassa sidebar'">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                [class.rotated]="isCollapsed">
+                <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+        </button>
     </div>
 
     <nav class="sidebar-nav">
         <div class="nav-section">
             <ul class="nav-list">
-                <li *ngFor="let item of menuItems" class="nav-item">
-                    <a [routerLink]="item.route" routerLinkActive="active" class="nav-link">
-                        <svg *ngIf="item.icon === 'home'" class="nav-icon" width="20" height="20" viewBox="0 0 24 24"
-                            fill="none" stroke="currentColor" stroke-width="2">
+                @for (item of menuItems; track item.route) {
+                <li class="nav-item">
+                    <a [routerLink]="item.route" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"
+                        class="nav-link">
+                        @if (item.icon === 'home') {
+                        <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
                             <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                             <polyline points="9 22 9 12 15 12 15 22"></polyline>
                         </svg>
-                        <svg *ngIf="item.icon === 'inbox'" class="nav-icon" width="20" height="20" viewBox="0 0 24 24"
-                            fill="none" stroke="currentColor" stroke-width="2">
+                        }
+                        @if (item.icon === 'inbox') {
+                        <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
                             <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
                         </svg>
-                        <svg *ngIf="item.icon === 'calendar'" class="nav-icon" width="20" height="20"
-                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        }
+                        @if (item.icon === 'calendar') {
+                        <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
                             <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
                             <line x1="16" y1="2" x2="16" y2="6"></line>
                             <line x1="8" y1="2" x2="8" y2="6"></line>
                             <line x1="3" y1="10" x2="21" y2="10"></line>
                         </svg>
-                        <svg *ngIf="item.icon === 'users'" class="nav-icon" width="20" height="20" viewBox="0 0 24 24"
-                            fill="none" stroke="currentColor" stroke-width="2">
+                        }
+                        @if (item.icon === 'users') {
+                        <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
                             <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
                             <circle cx="9" cy="7" r="4"></circle>
                             <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
                             <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
                         </svg>
-                        <svg *ngIf="item.icon === 'folder'" class="nav-icon" width="20" height="20" viewBox="0 0 24 24"
-                            fill="none" stroke="currentColor" stroke-width="2">
+                        }
+                        @if (item.icon === 'folder') {
+                        <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
                             <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z">
                             </path>
                         </svg>
-                        <svg *ngIf="item.icon === 'check-square'" class="nav-icon" width="20" height="20"
-                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        }
+                        @if (item.icon === 'check-square') {
+                        <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
                             <polyline points="9 11 12 14 22 4"></polyline>
                             <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
                         </svg>
-                        <svg *ngIf="item.icon === 'star'" class="nav-icon" width="20" height="20" viewBox="0 0 24 24"
-                            fill="none" stroke="currentColor" stroke-width="2">
+                        }
+                        @if (item.icon === 'star') {
+                        <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
                             <polygon
                                 points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
                             </polygon>
                         </svg>
-                        <span class="nav-label">{{ item.label }}</span>
+                        }
+                        <span class="nav-label" [class.hidden]="isCollapsed">{{ item.label }}</span>
                     </a>
                 </li>
+                }
             </ul>
         </div>
 
         <div class="nav-section">
             <div class="nav-section-header">
-                <span class="section-title">I miei progetti</span>
-                <button class="add-project-btn" (click)="goToAllProjects()" aria-label="Vedi tutti i progetti">
+                <span class="section-title" [class.hidden]="isCollapsed">I miei progetti</span>
+                <button class="add-project-btn" (click)="goToAllProjects()" aria-label="Vedi tutti i progetti"
+                    [class.hidden]="isCollapsed">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <line x1="12" y1="5" x2="12" y2="19"></line>
                         <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -68,35 +93,84 @@
             </div>
 
             <!-- Loading State -->
-            <div *ngIf="loadingProjects" class="projects-loading">
+            @if (loadingProjects) {
+            <div class="projects-loading">
                 <div class="mini-spinner"></div>
             </div>
+            }
 
             <!-- Empty State -->
-            <div *ngIf="!loadingProjects && projects.length === 0" class="projects-empty">
+            @if (!loadingProjects && projects.length === 0) {
+            <div class="projects-empty">
                 <span>Nessun progetto</span>
             </div>
+            }
 
             <!-- Projects List -->
-            <ul class="nav-list" *ngIf="!loadingProjects && projects.length > 0">
-                <li *ngFor="let project of projects; let i = index" class="nav-item">
-                    <a class="nav-link project-link" (click)="goToProject(project)">
+            @if (!loadingProjects && projects.length > 0) {
+            <ul class="nav-list">
+                @for (project of projects; track project.id; let i = $index) {
+                <li class="nav-item">
+                    <a class="nav-link project-link" [routerLink]="['/projects', project.id]" routerLinkActive="active">
                         <span class="project-color" [style.background-color]="getProjectColor(i)"></span>
                         <span class="nav-label project-name">{{ project.title }}</span>
-                        <span class="project-task-count" *ngIf="project.phases">{{ project.phases.length }}</span>
+                        <span class="project-task-count">{{ getTaskCount(project.id) }}</span>
                     </a>
                 </li>
+                }
             </ul>
+            }
         </div>
     </nav>
 
     <div class="sidebar-footer">
-        <div class="user-menu-btn">
+        <div class="user-menu-btn" (click)="toggleSettingsPopup($event)">
             <div class="user-avatar avatar-gradient-1">{{ getInitials() }}</div>
-            <div class="user-info">
+            <div class="user-info" [class.hidden]="isCollapsed">
                 <span class="user-name">{{ user?.displayName || 'Utente' }}</span>
                 <span class="user-email">{{ user?.email || 'utente@example.com' }}</span>
             </div>
         </div>
+
+        <!-- Settings Popup -->
+        @if (showSettingsPopup) {
+        <div class="settings-popup">
+            <div class="popup-header">
+                <h3>Impostazioni</h3>
+            </div>
+            <div class="popup-content">
+                <button class="popup-item" (click)="goToProfile()">
+                    <svg class="popup-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                    <span>Profilo</span>
+                </button>
+                <div class="popup-item notification-toggle" (click)="toggleNotifications()">
+                    <svg class="popup-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                    </svg>
+                    <span>Notifiche</span>
+                    <div class="toggle-switch" [class.active]="notificationsEnabled">
+                        <div class="toggle-slider"></div>
+                    </div>
+                </div>
+                <div class="popup-section">
+                    <button class="popup-item logout" (click)="logout()">
+                        <svg class="popup-icon" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                            <polyline points="16 17 21 12 16 7"></polyline>
+                            <line x1="21" y1="12" x2="9" y2="12"></line>
+                        </svg>
+                        <span>Esci</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        }
     </div>
 </aside>

@@ -17,8 +17,13 @@
   -webkit-backdrop-filter: blur(20px);
   z-index: 100;
   overflow-y: auto;
-  overflow-x: hidden;
+  overflow-x: visible; // Cambiato da hidden a visible per permettere al popup di essere visibile
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+  transition: width 0.3s $transition-easing-in-out;
+
+  &.collapsed {
+    width: 80px;
+  }
 
   body.light & {
     border-color: rgba(0, 0, 0, 0.1);
@@ -38,12 +43,17 @@
 .sidebar-header {
   padding: $spacing-4 $spacing-4 $spacing-3;
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
 
   body.light & {
     border-bottom-color: rgba(0, 0, 0, 0.1);
+  }
+
+  .sidebar.collapsed & {
+    justify-content: center;
   }
 }
 
@@ -66,9 +76,61 @@
   font-weight: 700;
   color: $text-primary-dark;
   letter-spacing: -0.02em;
+  transition: opacity 0.2s $transition-easing-in-out;
+  white-space: nowrap;
 
   body.light & {
     color: $text-primary-light;
+  }
+
+  .sidebar.collapsed & {
+    opacity: 0;
+    width: 0;
+    overflow: hidden;
+  }
+}
+
+.collapse-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: $radius-lg;
+  color: $text-secondary-dark;
+  cursor: pointer;
+  transition: all 0.2s $transition-easing-in-out;
+  flex-shrink: 0;
+
+  body.light & {
+    background: rgba(0, 0, 0, 0.05);
+    border-color: rgba(0, 0, 0, 0.1);
+    color: $text-secondary-light;
+  }
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: $color-accent;
+    transform: scale(1.05);
+
+    body.light & {
+      background: rgba(0, 0, 0, 0.08);
+    }
+  }
+
+  svg {
+    transition: transform 0.3s $transition-easing-in-out;
+  }
+
+  svg.rotated {
+    transform: rotate(180deg);
+  }
+
+  .sidebar.collapsed & {
+    position: absolute;
+    right: $spacing-2;
   }
 }
 
@@ -95,9 +157,17 @@
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: $text-secondary-dark;
+  transition: opacity 0.2s $transition-easing-in-out;
+  white-space: nowrap;
 
   body.light & {
     color: $text-secondary-light;
+  }
+
+  &.hidden {
+    opacity: 0;
+    width: 0;
+    overflow: hidden;
   }
 }
 
@@ -146,6 +216,14 @@
   border-radius: $radius-xl;
   transition: all 0.2s $transition-easing-in-out;
   position: relative;
+   margin-bottom: 10px;
+
+
+  .sidebar.collapsed & {
+    justify-content: center;
+    padding: $spacing-2;
+    margin: 0 $spacing-1;
+  }
 
   body.light & {
     color: $text-secondary-light;
@@ -170,17 +248,7 @@
     background: rgba(108, 99, 255, 0.15);
     color: $color-accent;
 
-    &::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 3px;
-      height: 60%;
-      background: $color-accent;
-      border-radius: 0 2px 2px 0;
-    }
+    
 
     .nav-icon {
       color: $color-accent;
@@ -196,6 +264,21 @@
 .nav-label {
   font-size: 0.9375rem;
   font-weight: 500;
+  transition: opacity 0.2s $transition-easing-in-out;
+  white-space: nowrap;
+
+  &.hidden {
+    opacity: 0;
+    width: 0;
+    overflow: hidden;
+  }
+}
+
+.hidden {
+  opacity: 0;
+  width: 0;
+  overflow: hidden;
+  transition: opacity 0.2s $transition-easing-in-out;
 }
 
 /* Project Link Styles */
@@ -270,6 +353,7 @@
   padding: $spacing-4;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   position: relative;
+  overflow: visible; // Permette al popup di essere visibile anche se esce dai confini
 
   body.light & {
     border-top-color: rgba(0, 0, 0, 0.1);
@@ -331,6 +415,13 @@
   flex-direction: column;
   align-items: flex-start;
   min-width: 0;
+  transition: opacity 0.2s $transition-easing-in-out;
+
+  &.hidden {
+    opacity: 0;
+    width: 0;
+    overflow: hidden;
+  }
 }
 
 .user-name {
@@ -357,6 +448,173 @@
 
   body.light & {
     color: $text-secondary-light;
+  }
+}
+
+// Settings Popup
+.settings-popup {
+  position: absolute;
+  bottom: calc(100% + #{$spacing-2});
+  left: 0;
+  right: 0;
+  width: 100%;
+  min-width: 240px;
+  max-width: 100%;
+  @include glass(0.2, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: $radius-2xl;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+  z-index: 1000; // Z-index più alto per essere sopra tutto
+  animation: slideUp 0.2s $transition-easing-out;
+  overflow: hidden;
+  pointer-events: auto; // Assicura che sia cliccabile
+
+  body.light & {
+    border-color: rgba(0, 0, 0, 0.15);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.popup-header {
+  padding: $spacing-4 $spacing-4 $spacing-3;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+  body.light & {
+    border-bottom-color: rgba(0, 0, 0, 0.1);
+  }
+
+  h3 {
+    margin: 0;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: $text-primary-dark;
+
+    body.light & {
+      color: $text-primary-light;
+    }
+  }
+}
+
+.popup-content {
+  padding: $spacing-2;
+}
+
+.popup-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: $spacing-3;
+  padding: $spacing-3 $spacing-4;
+  background: none;
+  border: none;
+  border-radius: $radius-xl;
+  color: $text-primary-dark;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s $transition-easing-in-out;
+  text-align: left;
+
+  body.light & {
+    color: $text-primary-light;
+  }
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: $color-accent;
+
+    body.light & {
+      background: rgba(0, 0, 0, 0.05);
+    }
+
+    .popup-icon {
+      color: $color-accent;
+    }
+  }
+
+  &.logout {
+    color: #ef4444;
+
+    &:hover {
+      background: rgba(239, 68, 68, 0.1);
+      color: #ef4444;
+
+      body.light & {
+        background: rgba(239, 68, 68, 0.15);
+      }
+    }
+  }
+
+  &.notification-toggle {
+    justify-content: space-between;
+  }
+}
+
+.toggle-switch {
+  width: 44px;
+  height: 24px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: $radius-full;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.2s $transition-easing-in-out;
+  flex-shrink: 0;
+
+  body.light & {
+    background: rgba(0, 0, 0, 0.1);
+  }
+
+  &.active {
+    background: $color-accent;
+
+    .toggle-slider {
+      transform: translateX(20px);
+    }
+  }
+}
+
+.toggle-slider {
+  width: 20px;
+  height: 20px;
+  background: white;
+  border-radius: 50%;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  transition: transform 0.2s $transition-easing-in-out;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.popup-icon {
+  flex-shrink: 0;
+  color: $text-secondary-dark;
+  transition: color 0.2s $transition-easing-in-out;
+
+  body.light & {
+    color: $text-secondary-light;
+  }
+}
+
+.popup-section {
+  margin-top: $spacing-4;
+  padding-top: $spacing-4;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+
+  body.light & {
+    border-top-color: rgba(0, 0, 0, 0.1);
   }
 }
 

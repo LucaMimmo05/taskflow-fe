@@ -71,24 +71,7 @@ export class Home implements OnInit {
           return;
         }
 
-        // Load tasks for all projects
-        const taskRequests = projects.map((p) => this.taskService.getTasksByProject(p.id));
-        forkJoin(taskRequests).subscribe({
-          next: (results) => {
-            const allTasks: RecentTask[] = [];
-            results.forEach((tasks, index) => {
-              tasks.forEach((task) => {
-                allTasks.push({ ...task, projectTitle: projects[index].title });
-              });
-            });
-
-            this.processTaskStats(allTasks, projects);
-            this.loading = false;
-          },
-          error: () => {
-            this.loading = false;
-          },
-        });
+        this.loadAllTasks(projects);
       },
       error: () => {
         this.loading = false;
@@ -96,24 +79,68 @@ export class Home implements OnInit {
     });
   }
 
-  processTaskStats(tasks: RecentTask[], projects: Project[]): void {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const nextWeek = new Date(today);
-    nextWeek.setDate(nextWeek.getDate() + 7);
+  private loadAllTasks(projects: Project[]): void {
+    const taskRequests = projects.map((p) => this.taskService.getTasksByProject(p.id));
+    
+    forkJoin(taskRequests).subscribe({
+      next: (results) => {
+        const allTasks = this.mapTasksWithProjects(results, projects);
+        this.processTaskStats(allTasks, projects);
+        this.loading = false;
+      },
+      error: () => {
+        this.loading = false;
+      },
+    });
+  }
+
+  private mapTasksWithProjects(results: Task[][], projects: Project[]): RecentTask[] {
+    const allTasks: RecentTask[] = [];
+    results.forEach((tasks, index) => {
+      tasks.forEach((task) => {
+        allTasks.push({ ...task, projectTitle: projects[index].title });
+      });
+    });
+    return allTasks;
+  }
+
+  private processTaskStats(tasks: RecentTask[], projects: Project[]): void {
+    const today = this.getToday();
+    const nextWeek = this.getNextWeek(today);
 
     this.stats.totalTasks = tasks.length;
+    this.stats.completedTasks = this.countCompletedTasks(tasks, projects);
+    
+    this.overdueTasks = this.filterOverdueTasks(tasks, today);
+    this.stats.overdueTasks = this.overdueTasks.length;
+    
+    this.upcomingTasks = this.filterUpcomingTasks(tasks, today, nextWeek);
+    this.stats.upcomingTasks = this.upcomingTasks.length;
+  }
 
-    // Count completed tasks (tasks in last phase of their project)
-    this.stats.completedTasks = tasks.filter((t) => {
+  private getToday(): Date {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return today;
+  }
+
+  private getNextWeek(today: Date): Date {
+    const nextWeek = new Date(today);
+    nextWeek.setDate(nextWeek.getDate() + 7);
+    return nextWeek;
+  }
+
+  private countCompletedTasks(tasks: RecentTask[], projects: Project[]): number {
+    return tasks.filter((t) => {
       const project = projects.find((p) => p.id === t.projectId);
-      if (!project || !project.phases || project.phases.length === 0) return false;
+      if (!project?.phases?.length) return false;
       const lastPhaseId = project.phases[project.phases.length - 1].id;
       return t.phaseId === lastPhaseId;
     }).length;
+  }
 
-    // Overdue tasks
-    this.overdueTasks = tasks
+  private filterOverdueTasks(tasks: RecentTask[], today: Date): RecentTask[] {
+    return tasks
       .filter((t) => {
         if (!t.dueDate) return false;
         const due = new Date(t.dueDate);
@@ -121,10 +148,10 @@ export class Home implements OnInit {
         return due < today;
       })
       .slice(0, 5);
-    this.stats.overdueTasks = this.overdueTasks.length;
+  }
 
-    // Upcoming tasks (next 7 days)
-    this.upcomingTasks = tasks
+  private filterUpcomingTasks(tasks: RecentTask[], today: Date, nextWeek: Date): RecentTask[] {
+    return tasks
       .filter((t) => {
         if (!t.dueDate) return false;
         const due = new Date(t.dueDate);
@@ -133,7 +160,6 @@ export class Home implements OnInit {
       })
       .sort((a, b) => new Date(a.dueDate!).getTime() - new Date(b.dueDate!).getTime())
       .slice(0, 5);
-    this.stats.upcomingTasks = this.upcomingTasks.length;
   }
 
   getGreeting(): string {
@@ -154,6 +180,10 @@ export class Home implements OnInit {
 
   goToProjects(): void {
     this.router.navigate(['/projects']);
+  }
+
+  goToTasks(): void {
+    this.router.navigate(['/tasks']);
   }
 
   goToCalendar(): void {
