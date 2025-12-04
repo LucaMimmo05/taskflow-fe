@@ -216,6 +216,8 @@
   border-radius: $radius-xl;
   transition: all 0.2s $transition-easing-in-out;
   position: relative;
+   margin-bottom: 10px;
+
 
   .sidebar.collapsed & {
     justify-content: center;
