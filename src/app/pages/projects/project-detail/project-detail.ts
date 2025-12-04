@@ -7,11 +7,12 @@ import { TaskService } from '../../../services/task.service';
 import { Project, Phase, Label, Collaborator } from '../../../models/project.model';
 import { Task, CreateTaskRequest, UpdateTaskRequest } from '../../../models/task.model';
 import { UserService } from '../../../services/user.service';
+import { OrderByPipe } from '../../../pipes/order-by.pipe';
 
 @Component({
   selector: 'app-project-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [CommonModule, RouterModule, FormsModule, OrderByPipe],
   templateUrl: './project-detail.html',
   styleUrl: './project-detail.scss',
 })
@@ -71,6 +72,18 @@ export class ProjectDetailComponent implements OnInit {
   showLabelsModal = false;
   labelForm = { title: '', color: '#6C63FF' };
   savingLabel = false;
+  presetColors = [
+    '#6C63FF',
+    '#F43F5E',
+    '#10B981',
+    '#F59E0B',
+    '#3B82F6',
+    '#8B5CF6',
+    '#EC4899',
+    '#14B8A6',
+    '#EF4444',
+    '#84CC16',
+  ];
 
   // Edit Label Modal
   showEditLabelModal = false;
@@ -91,13 +104,33 @@ export class ProjectDetailComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    const projectId = this.route.snapshot.paramMap.get('id');
-    if (projectId) {
-      this.loadProject(projectId);
-    } else {
-      this.error = 'ID progetto non valido';
-      this.loading = false;
-    }
+    // Subscribe to route params to handle project switching
+    this.route.paramMap.subscribe((params) => {
+      const projectId = params.get('id');
+      if (projectId) {
+        this.resetState();
+        this.loadProject(projectId);
+      } else {
+        this.error = 'ID progetto non valido';
+        this.loading = false;
+      }
+    });
+  }
+
+  resetState(): void {
+    this.project = null;
+    this.tasks = [];
+    this.error = null;
+    this.showTaskModal = false;
+    this.showDeleteConfirm = false;
+    this.showEditProjectModal = false;
+    this.showDeleteProjectConfirm = false;
+    this.showCollaboratorsModal = false;
+    this.showPhaseModal = false;
+    this.showDeletePhaseConfirm = false;
+    this.showLabelsModal = false;
+    this.showEditLabelModal = false;
+    this.showDeleteLabelConfirm = false;
   }
 
   loadProject(projectId: string): void {
@@ -432,6 +465,19 @@ export class ProjectDetailComponent implements OnInit {
   }
 
   // Phase Management
+  readonly MAX_PHASES = 3;
+
+  openCreatePhaseModal(): void {
+    if (this.project && this.project.phases.length >= this.MAX_PHASES) {
+      this.error = `Puoi avere massimo ${this.MAX_PHASES} fasi`;
+      return;
+    }
+    this.editingPhase = null;
+    this.phaseForm.title = '';
+    this.error = null;
+    this.showPhaseModal = true;
+  }
+
   openEditPhaseModal(phase: Phase): void {
     this.editingPhase = phase;
     this.phaseForm.title = phase.title;
@@ -447,7 +493,7 @@ export class ProjectDetailComponent implements OnInit {
   }
 
   submitPhase(): void {
-    if (!this.project || !this.editingPhase) return;
+    if (!this.project) return;
     if (!this.phaseForm.title.trim()) {
       this.error = 'Il nome della fase è obbligatorio';
       return;
@@ -456,23 +502,49 @@ export class ProjectDetailComponent implements OnInit {
     this.savingPhase = true;
     this.error = null;
 
-    const updatedPhases = this.project.phases.map((p) =>
-      p.id === this.editingPhase!.id ? { ...p, title: this.phaseForm.title.trim() } : p
-    );
+    if (this.editingPhase) {
+      // Update existing phase
+      const updatedPhases = this.project.phases.map((p) =>
+        p.id === this.editingPhase!.id ? { ...p, title: this.phaseForm.title.trim() } : p
+      );
 
-    this.projectService.updateProject(this.project.id, { phases: updatedPhases }).subscribe({
-      next: (updated) => {
-        this.project = updated;
-        this.savingPhase = false;
-        this.showPhaseModal = false;
-        this.editingPhase = null;
-      },
-      error: (err) => {
-        this.error = 'Errore aggiornamento fase';
-        this.savingPhase = false;
-        console.error(err);
-      },
-    });
+      this.projectService.updateProject(this.project.id, { phases: updatedPhases }).subscribe({
+        next: (updated) => {
+          this.project = updated;
+          this.savingPhase = false;
+          this.showPhaseModal = false;
+          this.editingPhase = null;
+        },
+        error: (err) => {
+          this.error = 'Errore aggiornamento fase';
+          this.savingPhase = false;
+          console.error(err);
+        },
+      });
+    } else {
+      // Create new phase
+      const maxPosition = this.project.phases.reduce((max, p) => Math.max(max, p.position), 0);
+      const newPhase: Phase = {
+        id: crypto.randomUUID(),
+        title: this.phaseForm.title.trim(),
+        position: maxPosition + 1,
+      };
+
+      const updatedPhases = [...this.project.phases, newPhase];
+
+      this.projectService.updateProject(this.project.id, { phases: updatedPhases }).subscribe({
+        next: (updated) => {
+          this.project = updated;
+          this.savingPhase = false;
+          this.showPhaseModal = false;
+        },
+        error: (err) => {
+          this.error = 'Errore creazione fase';
+          this.savingPhase = false;
+          console.error(err);
+        },
+      });
+    }
   }
 
   confirmDeletePhase(phase: Phase): void {
@@ -483,6 +555,53 @@ export class ProjectDetailComponent implements OnInit {
 
   cancelDeletePhase(): void {
     this.phaseToDelete = null;
+  }
+
+  movePhaseLeft(phase: Phase): void {
+    if (!this.project) return;
+    const sortedPhases = [...this.project.phases].sort((a, b) => a.position - b.position);
+    const currentIndex = sortedPhases.findIndex((p) => p.id === phase.id);
+    if (currentIndex <= 0) return;
+
+    // Swap positions
+    const temp = sortedPhases[currentIndex].position;
+    sortedPhases[currentIndex].position = sortedPhases[currentIndex - 1].position;
+    sortedPhases[currentIndex - 1].position = temp;
+
+    this.updatePhasesOrder(sortedPhases);
+  }
+
+  movePhaseRight(phase: Phase): void {
+    if (!this.project) return;
+    const sortedPhases = [...this.project.phases].sort((a, b) => a.position - b.position);
+    const currentIndex = sortedPhases.findIndex((p) => p.id === phase.id);
+    if (currentIndex >= sortedPhases.length - 1) return;
+
+    // Swap positions
+    const temp = sortedPhases[currentIndex].position;
+    sortedPhases[currentIndex].position = sortedPhases[currentIndex + 1].position;
+    sortedPhases[currentIndex + 1].position = temp;
+
+    this.updatePhasesOrder(sortedPhases);
+  }
+
+  updatePhasesOrder(phases: Phase[]): void {
+    if (!this.project) return;
+    this.projectService.updateProject(this.project.id, { phases }).subscribe({
+      next: (updated) => {
+        this.project = updated;
+      },
+      error: (err) => {
+        this.error = 'Errore riordinamento fasi';
+        console.error(err);
+      },
+    });
+  }
+
+  getPhaseIndex(phase: Phase): number {
+    if (!this.project) return -1;
+    const sortedPhases = [...this.project.phases].sort((a, b) => a.position - b.position);
+    return sortedPhases.findIndex((p) => p.id === phase.id);
     this.showDeletePhaseConfirm = false;
   }
 

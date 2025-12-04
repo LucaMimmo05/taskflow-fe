@@ -173,9 +173,59 @@
   }
 }
 
-.column-header {
+// Add Phase Column
+.add-phase-column {
+  @include glass(0.08, 0.04);
+  border-radius: $radius-2xl;
+  min-width: 200px;
+  max-width: 250px;
   display: flex;
   align-items: center;
+  justify-content: center;
+  border: 2px dashed rgba(255, 255, 255, 0.15);
+  cursor: pointer;
+  transition: all $transition-duration-base $transition-easing;
+
+  body.light & {
+    border-color: rgba(0, 0, 0, 0.15);
+  }
+
+  &:hover {
+    border-color: $color-accent;
+    background: rgba(108, 99, 255, 0.1);
+
+    .add-phase-content {
+      color: $color-accent;
+    }
+  }
+}
+
+.add-phase-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $spacing-2;
+  color: $text-secondary-dark;
+  transition: color $transition-duration-fast $transition-easing;
+
+  body.light & {
+    color: $text-secondary-light;
+  }
+
+  span {
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+
+  .phase-count {
+    font-size: 0.6875rem;
+    opacity: 0.7;
+  }
+}
+
+.column-header {
+  display: flex;
+  flex-direction: column;
   gap: $spacing-2;
   padding: $spacing-3 $spacing-4;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
@@ -185,12 +235,47 @@
   }
 }
 
+.column-title-row {
+  display: flex;
+  align-items: center;
+  gap: $spacing-2;
+  width: 100%;
+}
+
+.move-btn {
+  @include glass(0.1, 0.05);
+  border: none;
+  border-radius: $radius-lg;
+  padding: 4px;
+  cursor: pointer;
+  color: $text-secondary-dark;
+  transition: all $transition-duration-fast $transition-easing;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  body.light & {
+    color: $text-secondary-light;
+  }
+
+  &:hover:not(:disabled) {
+    background: rgba(108, 99, 255, 0.2);
+    color: $color-accent;
+  }
+
+  &:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+}
+
 .column-title {
   margin: 0;
   font-size: 0.875rem;
   font-weight: 600;
   color: $text-primary-dark;
   flex: 1;
+  text-align: center;
 
   body.light & {
     color: $text-primary-light;
@@ -209,6 +294,12 @@
     background: rgba(0, 0, 0, 0.08);
     color: $text-secondary-light;
   }
+}
+
+.column-actions {
+  display: flex;
+  justify-content: center;
+  gap: $spacing-1;
 }
 
 .add-task-btn {
@@ -840,57 +931,144 @@
   }
 }
 
-// Labels Modal Styles
-.add-label-form {
-  display: flex;
-  gap: $spacing-2;
-  margin-bottom: $spacing-4;
+// Labels Modal Styles - Simplified
+.labels-modal {
+  max-width: 480px;
+}
 
-  input[type='text'] {
-    flex: 1;
+.add-label-row {
+  display: flex;
+  align-items: center;
+  gap: $spacing-2;
+  margin-bottom: $spacing-3;
+}
+
+.label-preview-small {
+  padding: $spacing-1 $spacing-3;
+  border-radius: $radius-full;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #fff;
+  min-width: 80px;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.label-input {
+  flex: 1;
+  padding: $spacing-2 $spacing-3;
+  border-radius: $radius-lg;
+  @include glass(0.1, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: $text-primary-dark;
+  font-size: 0.875rem;
+  min-width: 0;
+
+  body.light & {
+    border-color: rgba(0, 0, 0, 0.15);
+    color: $text-primary-light;
   }
 
-  .color-picker {
-    width: 44px;
-    height: 44px;
-    padding: 4px;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: $radius-lg;
-    background: transparent;
-    cursor: pointer;
+  &::placeholder {
+    color: $text-secondary-dark;
 
     body.light & {
-      border-color: rgba(0, 0, 0, 0.15);
+      color: $text-secondary-light;
     }
   }
 }
 
-.color-picker-lg {
-  width: 100%;
-  height: 44px;
-  padding: 4px;
+.color-input {
+  width: 40px;
+  height: 40px;
+  padding: 2px;
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: $radius-lg;
   background: transparent;
   cursor: pointer;
+  flex-shrink: 0;
 
   body.light & {
     border-color: rgba(0, 0, 0, 0.15);
   }
 }
 
-.labels-list {
+.btn-add {
+  @include glass(0.2, 0.1);
+  border: none;
+  border-radius: $radius-lg;
+  padding: $spacing-2;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  color: #fff;
+  background: $color-accent;
+  transition: all $transition-duration-fast $transition-easing;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  &:hover:not(:disabled) {
+    background: lighten($color-accent, 5%);
+    transform: scale(1.05);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.preset-colors-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: $spacing-4;
+  padding-bottom: $spacing-4;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+  body.light & {
+    border-color: rgba(0, 0, 0, 0.1);
+  }
+}
+
+.preset-dot {
+  width: 24px;
+  height: 24px;
+  border-radius: $radius-full;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all $transition-duration-fast $transition-easing;
+  padding: 0;
+
+  &:hover {
+    transform: scale(1.2);
+  }
+
+  &.selected {
+    border-color: #fff;
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.3);
+    transform: scale(1.1);
+  }
+}
+
+.labels-list-container {
   display: flex;
   flex-direction: column;
   gap: $spacing-2;
+  max-height: 300px;
+  overflow-y: auto;
 }
 
-.label-item {
+.label-row {
   display: flex;
   align-items: center;
-  gap: $spacing-3;
-  padding: $spacing-3;
-  @include glass(0.1, 0.05);
+  justify-content: space-between;
+  padding: $spacing-2 $spacing-3;
+  @include glass(0.08, 0.04);
   border-radius: $radius-lg;
   border: 1px solid rgba(255, 255, 255, 0.08);
 
@@ -899,29 +1077,20 @@
   }
 }
 
-.label-color {
-  width: 20px;
-  height: 20px;
+.label-badge {
+  padding: $spacing-1 $spacing-3;
   border-radius: $radius-full;
-  flex-shrink: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #fff;
 }
 
-.label-name {
-  flex: 1;
-  font-size: 0.875rem;
-  color: $text-primary-dark;
-
-  body.light & {
-    color: $text-primary-light;
-  }
-}
-
-.label-actions {
+.label-row-actions {
   display: flex;
   gap: $spacing-1;
 }
 
-.label-action-btn {
+.btn-icon {
   @include glass(0.15, 0.08);
   border: none;
   border-radius: $radius-lg;
@@ -945,6 +1114,20 @@
   &.danger:hover {
     background: rgba(244, 63, 94, 0.2);
     color: $status-overdue;
+  }
+}
+
+.color-picker-lg {
+  width: 100%;
+  height: 44px;
+  padding: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: $radius-lg;
+  background: transparent;
+  cursor: pointer;
+
+  body.light & {
+    border-color: rgba(0, 0, 0, 0.15);
   }
 }
 
