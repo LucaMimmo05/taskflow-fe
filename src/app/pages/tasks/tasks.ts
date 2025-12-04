@@ -6,7 +6,7 @@ import { TaskService } from '../../services/task.service';
 import { ProjectService } from '../../services/project.service';
 import { Task } from '../../models/task.model';
 import { Project } from '../../models/project.model';
-import { forkJoin } from 'rxjs';
+import { forkJoin, Observable, catchError } from 'rxjs';
 
 interface TaskWithProject extends Task {
   projectTitle?: string;
@@ -54,29 +54,42 @@ export class TasksPage implements OnInit {
 
   loadData(): void {
     this.loading = true;
+    this.error = null;
     this.projectService.getProjects().subscribe({
       next: (projects) => {
         this.projects = projects;
 
         if (projects.length === 0) {
           this.loading = false;
+          this.allTasks = [];
+          this.filteredTasks = [];
           return;
         }
 
-        // Load tasks for all projects
-        const taskRequests = projects.map((p) => this.taskService.getTasksByProject(p.id));
+        // Load tasks for all projects with error handling per project
+        const taskRequests = projects.map((p) => 
+          this.taskService.getTasksByProject(p.id).pipe(
+            catchError(() => {
+              console.warn(`Errore nel caricamento delle task per il progetto ${p.id}`);
+              return new Observable<Task[]>(subscriber => subscriber.next([]));
+            })
+          )
+        );
+
         forkJoin(taskRequests).subscribe({
           next: (results) => {
             this.allTasks = [];
             results.forEach((tasks, index) => {
               const project = projects[index];
-              tasks.forEach((task) => {
-                this.allTasks.push({
-                  ...task,
-                  projectTitle: project.title,
-                  projectColor: this.projectColors[index % this.projectColors.length],
+              if (Array.isArray(tasks)) {
+                tasks.forEach((task) => {
+                  this.allTasks.push({
+                    ...task,
+                    projectTitle: project.title,
+                    projectColor: this.projectColors[index % this.projectColors.length],
+                  });
                 });
-              });
+              }
             });
             // Sort by due date (upcoming first)
             this.allTasks.sort((a, b) => {
@@ -88,13 +101,15 @@ export class TasksPage implements OnInit {
             this.filteredTasks = [...this.allTasks];
             this.loading = false;
           },
-          error: () => {
+          error: (err) => {
+            console.error('Errore nel caricamento delle task:', err);
             this.error = 'Errore nel caricamento delle task';
             this.loading = false;
           },
         });
       },
-      error: () => {
+      error: (err) => {
+        console.error('Errore nel caricamento dei progetti:', err);
         this.error = 'Errore nel caricamento dei progetti';
         this.loading = false;
       },

@@ -6,6 +6,7 @@ import { ProjectsPage } from './pages/projects/projects';
 import { ProjectDetailComponent } from './pages/projects/project-detail/project-detail';
 import { CalendarPage } from './pages/calendar/calendar';
 import { TasksPage } from './pages/tasks/tasks';
+import { ProfilePage } from './pages/profile/profile';
 import { MainLayout } from './components/main-layout/main-layout';
 import { authGuard } from './guards/auth.guard';
 import { guestGuard } from './guards/guest.guard';
@@ -23,6 +24,7 @@ export const routes: Routes = [
       { path: 'projects/:id', component: ProjectDetailComponent },
       { path: 'calendar', component: CalendarPage },
       { path: 'tasks', component: TasksPage },
+      { path: 'profile', component: ProfilePage },
     ],
   },
 ];
