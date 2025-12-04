@@ -19,7 +19,7 @@ import { environment } from '../../environments/environment';
   providedIn: 'root',
 })
 export class ProjectService {
-  private readonly apiUrl = `${environment.apiUrl}/projects`;
+  private readonly apiUrl = `${environment.apiUrl}/project`;
 
   constructor(private http: HttpClient, private authService: AuthService) {}
 
