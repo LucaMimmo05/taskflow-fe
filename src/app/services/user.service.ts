@@ -12,7 +12,7 @@ import { AuthService } from './auth.service';
   providedIn: 'root',
 })
 export class UserService {
-  private readonly apiUrl = 'http://localhost:8080/api/user';
+  private readonly apiUrl = (process.env['NG_APP_API_URL'] || 'http://localhost:8080/api') + '/user';
 
   constructor(private http: HttpClient, private authService: AuthService) {}
 

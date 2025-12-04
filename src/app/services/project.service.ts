@@ -18,7 +18,7 @@ import { AuthService } from './auth.service';
   providedIn: 'root',
 })
 export class ProjectService {
-  private readonly apiUrl = 'http://localhost:8080/api/project';
+  private readonly apiUrl = (process.env['NG_APP_API_URL'] || 'http://localhost:8080/api') + '/projects';
 
   constructor(
     private http: HttpClient,

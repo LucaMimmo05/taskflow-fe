@@ -12,7 +12,7 @@ import { AuthService } from './auth.service';
   providedIn: 'root',
 })
 export class TaskService {
-  private readonly apiUrl = 'http://localhost:8080/api/task';
+  private readonly apiUrl = (process.env['NG_APP_API_URL'] || 'http://localhost:8080/api') + '/tasks';
 
   constructor(
     private http: HttpClient,
