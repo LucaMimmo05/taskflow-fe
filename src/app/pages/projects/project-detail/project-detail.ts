@@ -56,6 +56,32 @@ export class ProjectDetailComponent implements OnInit {
   addingCollaborator = false;
   removingCollaboratorId: string | null = null;
 
+  // Phase Modal
+  showPhaseModal = false;
+  editingPhase: Phase | null = null;
+  phaseForm = { title: '' };
+  savingPhase = false;
+
+  // Delete Phase Confirmation
+  showDeletePhaseConfirm = false;
+  phaseToDelete: Phase | null = null;
+  deletingPhase = false;
+
+  // Labels Modal
+  showLabelsModal = false;
+  labelForm = { title: '', color: '#6C63FF' };
+  savingLabel = false;
+
+  // Edit Label Modal
+  showEditLabelModal = false;
+  editingLabel: Label | null = null;
+  editLabelForm = { title: '', color: '' };
+
+  // Delete Label Confirmation
+  showDeleteLabelConfirm = false;
+  labelToDelete: Label | null = null;
+  deletingLabel = false;
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -150,6 +176,12 @@ export class ProjectDetailComponent implements OnInit {
     this.savingTask = true;
     this.error = null;
 
+    // Convert date format from YYYY-MM-DD to YYYY-MM-DDTHH:mm:ss for backend
+    const formatDueDate = (date: string | undefined): string | undefined => {
+      if (!date) return undefined;
+      return `${date}T23:59:59`;
+    };
+
     if (this.editingTask) {
       // Update existing task
       const updates: UpdateTaskRequest = {
@@ -158,7 +190,7 @@ export class ProjectDetailComponent implements OnInit {
         phaseId: this.taskForm.phaseId,
         labelIds: this.taskForm.labelIds,
         assignees: this.taskForm.assignees,
-        dueDate: this.taskForm.dueDate || undefined,
+        dueDate: formatDueDate(this.taskForm.dueDate),
       };
 
       this.taskService.updateTask(this.editingTask.id, updates).subscribe({
@@ -182,7 +214,7 @@ export class ProjectDetailComponent implements OnInit {
         phaseId: this.taskForm.phaseId,
         labelIds: this.taskForm.labelIds,
         assignees: this.taskForm.assignees,
-        dueDate: this.taskForm.dueDate || undefined,
+        dueDate: formatDueDate(this.taskForm.dueDate),
       };
 
       this.taskService.createTask(this.project.id, request).subscribe({
@@ -397,5 +429,219 @@ export class ProjectDetailComponent implements OnInit {
 
   isCreator(collaborator: Collaborator): boolean {
     return collaborator.role === 'creator';
+  }
+
+  // Phase Management
+  openEditPhaseModal(phase: Phase): void {
+    this.editingPhase = phase;
+    this.phaseForm.title = phase.title;
+    this.error = null;
+    this.showPhaseModal = true;
+  }
+
+  closePhaseModal(): void {
+    if (this.savingPhase) return;
+    this.showPhaseModal = false;
+    this.editingPhase = null;
+    this.phaseForm.title = '';
+  }
+
+  submitPhase(): void {
+    if (!this.project || !this.editingPhase) return;
+    if (!this.phaseForm.title.trim()) {
+      this.error = 'Il nome della fase è obbligatorio';
+      return;
+    }
+
+    this.savingPhase = true;
+    this.error = null;
+
+    const updatedPhases = this.project.phases.map((p) =>
+      p.id === this.editingPhase!.id ? { ...p, title: this.phaseForm.title.trim() } : p
+    );
+
+    this.projectService.updateProject(this.project.id, { phases: updatedPhases }).subscribe({
+      next: (updated) => {
+        this.project = updated;
+        this.savingPhase = false;
+        this.showPhaseModal = false;
+        this.editingPhase = null;
+      },
+      error: (err) => {
+        this.error = 'Errore aggiornamento fase';
+        this.savingPhase = false;
+        console.error(err);
+      },
+    });
+  }
+
+  confirmDeletePhase(phase: Phase): void {
+    if (!this.project || this.project.phases.length <= 1) return;
+    this.phaseToDelete = phase;
+    this.showDeletePhaseConfirm = true;
+  }
+
+  cancelDeletePhase(): void {
+    this.phaseToDelete = null;
+    this.showDeletePhaseConfirm = false;
+  }
+
+  deletePhase(): void {
+    if (!this.project || !this.phaseToDelete) return;
+
+    this.deletingPhase = true;
+    const phaseIdToDelete = this.phaseToDelete.id;
+    const updatedPhases = this.project.phases.filter((p) => p.id !== phaseIdToDelete);
+
+    // Find first available phase to move tasks to
+    const targetPhaseId = updatedPhases[0]?.id;
+
+    this.projectService.updateProject(this.project.id, { phases: updatedPhases }).subscribe({
+      next: (updated) => {
+        this.project = updated;
+        // Move tasks from deleted phase to first available phase
+        if (targetPhaseId) {
+          this.tasks = this.tasks.map((t) =>
+            t.phaseId === phaseIdToDelete ? { ...t, phaseId: targetPhaseId } : t
+          );
+        }
+        this.deletingPhase = false;
+        this.showDeletePhaseConfirm = false;
+        this.phaseToDelete = null;
+      },
+      error: (err) => {
+        this.error = 'Errore eliminazione fase';
+        this.deletingPhase = false;
+        console.error(err);
+      },
+    });
+  }
+
+  // Labels Management
+  openLabelsModal(): void {
+    this.labelForm = { title: '', color: '#6C63FF' };
+    this.error = null;
+    this.showLabelsModal = true;
+  }
+
+  closeLabelsModal(): void {
+    if (this.savingLabel) return;
+    this.showLabelsModal = false;
+    this.labelForm = { title: '', color: '#6C63FF' };
+    this.error = null;
+  }
+
+  addLabel(): void {
+    if (!this.project) return;
+    if (!this.labelForm.title.trim()) {
+      this.error = "Il nome dell'etichetta è obbligatorio";
+      return;
+    }
+
+    this.savingLabel = true;
+    this.error = null;
+
+    const newLabel: Label = {
+      id: crypto.randomUUID(),
+      title: this.labelForm.title.trim(),
+      color: this.labelForm.color,
+    };
+
+    const updatedLabels = [...this.project.labels, newLabel];
+
+    this.projectService.updateProject(this.project.id, { labels: updatedLabels }).subscribe({
+      next: (updated) => {
+        this.project = updated;
+        this.labelForm = { title: '', color: '#6C63FF' };
+        this.savingLabel = false;
+      },
+      error: (err) => {
+        this.error = 'Errore creazione etichetta';
+        this.savingLabel = false;
+        console.error(err);
+      },
+    });
+  }
+
+  openEditLabelModal(label: Label): void {
+    this.editingLabel = label;
+    this.editLabelForm = { title: label.title, color: label.color };
+    this.error = null;
+    this.showEditLabelModal = true;
+  }
+
+  closeEditLabelModal(): void {
+    if (this.savingLabel) return;
+    this.showEditLabelModal = false;
+    this.editingLabel = null;
+    this.editLabelForm = { title: '', color: '' };
+  }
+
+  submitEditLabel(): void {
+    if (!this.project || !this.editingLabel) return;
+    if (!this.editLabelForm.title.trim()) {
+      this.error = "Il nome dell'etichetta è obbligatorio";
+      return;
+    }
+
+    this.savingLabel = true;
+    this.error = null;
+
+    const updatedLabels = this.project.labels.map((l) =>
+      l.id === this.editingLabel!.id
+        ? { ...l, title: this.editLabelForm.title.trim(), color: this.editLabelForm.color }
+        : l
+    );
+
+    this.projectService.updateProject(this.project.id, { labels: updatedLabels }).subscribe({
+      next: (updated) => {
+        this.project = updated;
+        this.savingLabel = false;
+        this.showEditLabelModal = false;
+        this.editingLabel = null;
+      },
+      error: (err) => {
+        this.error = 'Errore aggiornamento etichetta';
+        this.savingLabel = false;
+        console.error(err);
+      },
+    });
+  }
+
+  confirmDeleteLabel(label: Label): void {
+    this.labelToDelete = label;
+    this.showDeleteLabelConfirm = true;
+  }
+
+  cancelDeleteLabel(): void {
+    this.labelToDelete = null;
+    this.showDeleteLabelConfirm = false;
+  }
+
+  deleteLabel(): void {
+    if (!this.project || !this.labelToDelete) return;
+
+    this.deletingLabel = true;
+    const labelIdToDelete = this.labelToDelete.id;
+    const updatedLabels = this.project.labels.filter((l) => l.id !== labelIdToDelete);
+
+    this.projectService.updateProject(this.project.id, { labels: updatedLabels }).subscribe({
+      next: (updated) => {
+        this.project = updated;
+        // Remove label from tasks locally
+        this.tasks = this.tasks.map((t) => ({
+          ...t,
+          labels: t.labels.filter((l) => l.id !== labelIdToDelete),
+        }));
+        this.deletingLabel = false;
+        this.showDeleteLabelConfirm = false;
+        this.labelToDelete = null;
+      },
+      error: (err) => {
+        this.error = 'Errore eliminazione etichetta';
+        this.deletingLabel = false;
+        console.error(err);
+      },
+    });
   }
 }

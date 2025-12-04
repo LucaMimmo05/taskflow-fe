@@ -144,8 +144,16 @@
   cursor: pointer;
   color: $text-secondary-dark;
   transition: all $transition-duration-base $transition-easing;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
   body.light & {
     color: $text-secondary-light;
+  }
+
+  svg {
+    display: block;
   }
 
   &:hover {

@@ -170,17 +170,7 @@
     background: rgba(108, 99, 255, 0.15);
     color: $color-accent;
 
-    &::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 3px;
-      height: 60%;
-      background: $color-accent;
-      border-radius: 0 2px 2px 0;
-    }
+    
 
     .nav-icon {
       color: $color-accent;
