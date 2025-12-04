@@ -117,7 +117,9 @@
                         <div class="project-item" (click)="goToProject(project)">
                             <div class="project-info">
                                 <span class="project-name">{{ project.title }}</span>
-                                <span class="project-meta">{{ project.phases.length || 0 }} fasi</span>
+                                <span class="project-meta">
+                                    {{ project.taskCount }} task • {{ project.phases.length || 0 }} fasi
+                                </span>
                             </div>
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2">
