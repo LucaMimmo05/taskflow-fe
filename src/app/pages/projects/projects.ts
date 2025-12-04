@@ -79,10 +79,34 @@ export class ProjectsPage implements OnInit {
     this.projectService.getProjects().subscribe({
       next: (data) => {
         this.projects = data;
-        this.loading = false;
+        this.loadTaskCounts();
       },
       error: (err) => {
         this.handleError('Errore nel caricamento progetti', err);
+      },
+    });
+  }
+
+  loadTaskCounts(): void {
+    if (this.projects.length === 0) {
+      this.loading = false;
+      return;
+    }
+
+    const taskRequests = this.projects.map((p) => this.taskService.getTasksByProject(p.id));
+    
+    forkJoin(taskRequests).subscribe({
+      next: (results) => {
+        this.projects = this.projects.map((project, index) => ({
+          ...project,
+          taskCount: results[index]?.length || 0,
+          tasks: results[index] || []
+        }));
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('Errore nel caricamento task counts:', err);
+        this.loading = false;
       },
     });
   }
