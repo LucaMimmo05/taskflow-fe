@@ -3,6 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { UserResponse, UpdateUserRequest, UpdateSettingsRequest } from '../models/user.model';
 import { AuthService } from './auth.service';
+import { environment } from '../../environments/environment';
 
 /**
  * Servizio per la gestione del profilo utente
@@ -12,8 +13,7 @@ import { AuthService } from './auth.service';
   providedIn: 'root',
 })
 export class UserService {
-  private readonly apiUrl =
-    (process.env['NG_APP_API_URL'] || 'http://localhost:8080/api') + '/user';
+  private readonly apiUrl = `${environment.apiUrl}/user`;
 
   constructor(private http: HttpClient, private authService: AuthService) {}
 
