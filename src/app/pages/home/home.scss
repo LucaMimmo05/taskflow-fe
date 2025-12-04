@@ -123,21 +123,10 @@
     border-color: rgba(0, 0, 0, 0.1);
   }
 
-  // Transparent variant - no background, no border
   &.stat-card-transparent {
     background: transparent;
     border: none;
     backdrop-filter: none;
-
-    &:hover {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-
-      body.light & {
-        background: rgba(0, 0, 0, 0.02);
-        border: 1px solid rgba(0, 0, 0, 0.05);
-      }
-    }
   }
 
   &.clickable {
@@ -152,11 +141,6 @@
     &:active {
       transform: translateY(-2px);
     }
-  }
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: $shadow-md;
   }
 
   &.warning {
