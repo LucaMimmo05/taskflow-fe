@@ -3,6 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Task, CreateTaskRequest, UpdateTaskRequest } from '../models/task.model';
 import { AuthService } from './auth.service';
+import { environment } from '../../environments/environment';
 
 /**
  * Servizio per la gestione dei task
@@ -12,12 +13,9 @@ import { AuthService } from './auth.service';
   providedIn: 'root',
 })
 export class TaskService {
-  private readonly apiUrl = (process.env['NG_APP_API_URL'] || 'http://localhost:8080/api') + '/tasks';
+  private readonly apiUrl = `${environment.apiUrl}/task`;
 
-  constructor(
-    private http: HttpClient,
-    private authService: AuthService
-  ) {}
+  constructor(private http: HttpClient, private authService: AuthService) {}
 
   /**
    * Crea gli headers HTTP con il token di autenticazione
@@ -39,7 +37,7 @@ export class TaskService {
    */
   getTasksByProject(projectId: string): Observable<Task[]> {
     return this.http.get<Task[]>(`${this.apiUrl}/${projectId}`, {
-      headers: this.getHeaders()
+      headers: this.getHeaders(),
     });
   }
 
@@ -51,7 +49,7 @@ export class TaskService {
    */
   createTask(projectId: string, task: CreateTaskRequest): Observable<Task> {
     return this.http.post<Task>(`${this.apiUrl}/${projectId}`, task, {
-      headers: this.getHeaders()
+      headers: this.getHeaders(),
     });
   }
 
@@ -63,7 +61,7 @@ export class TaskService {
    */
   updateTask(taskId: string, updates: UpdateTaskRequest): Observable<Task> {
     return this.http.put<Task>(`${this.apiUrl}/${taskId}`, updates, {
-      headers: this.getHeaders()
+      headers: this.getHeaders(),
     });
   }
 
@@ -74,7 +72,7 @@ export class TaskService {
    */
   deleteTask(taskId: string): Observable<{ message: string }> {
     return this.http.delete<{ message: string }>(`${this.apiUrl}/${taskId}`, {
-      headers: this.getHeaders()
+      headers: this.getHeaders(),
     });
   }
 }

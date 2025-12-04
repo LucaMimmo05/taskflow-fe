@@ -41,3 +41,6 @@ testem.log
 .DS_Store
 Thumbs.db
 .env
+
+# Environment files (generated at build time)
+/src/environments/environment.prod.ts

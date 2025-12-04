@@ -6,9 +6,10 @@ import {
   CreateProjectRequest,
   UpdateProjectRequest,
   AddCollaboratorRequest,
-  RemoveCollaboratorRequest
+  RemoveCollaboratorRequest,
 } from '../models/project.model';
 import { AuthService } from './auth.service';
+import { environment } from '../../environments/environment';
 
 /**
  * Servizio per la gestione dei progetti
@@ -18,12 +19,9 @@ import { AuthService } from './auth.service';
   providedIn: 'root',
 })
 export class ProjectService {
-  private readonly apiUrl = (process.env['NG_APP_API_URL'] || 'http://localhost:8080/api') + '/projects';
+  private readonly apiUrl = `${environment.apiUrl}/projects`;
 
-  constructor(
-    private http: HttpClient,
-    private authService: AuthService
-  ) {}
+  constructor(private http: HttpClient, private authService: AuthService) {}
 
   /**
    * Crea gli headers HTTP con il token di autenticazione
@@ -44,7 +42,7 @@ export class ProjectService {
    */
   getProjects(): Observable<Project[]> {
     return this.http.get<Project[]>(this.apiUrl, {
-      headers: this.getHeaders()
+      headers: this.getHeaders(),
     });
   }
 
@@ -55,7 +53,7 @@ export class ProjectService {
    */
   getProject(projectId: string): Observable<Project> {
     return this.http.get<Project>(`${this.apiUrl}/${projectId}`, {
-      headers: this.getHeaders()
+      headers: this.getHeaders(),
     });
   }
 
@@ -66,7 +64,7 @@ export class ProjectService {
    */
   createProject(project: CreateProjectRequest): Observable<Project> {
     return this.http.post<Project>(this.apiUrl, project, {
-      headers: this.getHeaders()
+      headers: this.getHeaders(),
     });
   }
 
@@ -78,7 +76,7 @@ export class ProjectService {
    */
   updateProject(projectId: string, updates: UpdateProjectRequest): Observable<Project> {
     return this.http.put<Project>(`${this.apiUrl}/${projectId}`, updates, {
-      headers: this.getHeaders()
+      headers: this.getHeaders(),
     });
   }
 
@@ -89,7 +87,7 @@ export class ProjectService {
    */
   deleteProject(projectId: string): Observable<{ message: string }> {
     return this.http.delete<{ message: string }>(`${this.apiUrl}/${projectId}`, {
-      headers: this.getHeaders()
+      headers: this.getHeaders(),
     });
   }
 
@@ -101,7 +99,7 @@ export class ProjectService {
    */
   addCollaborator(projectId: string, request: AddCollaboratorRequest): Observable<Project> {
     return this.http.post<Project>(`${this.apiUrl}/${projectId}/collaborators`, request, {
-      headers: this.getHeaders()
+      headers: this.getHeaders(),
     });
   }
 
@@ -114,7 +112,7 @@ export class ProjectService {
   removeCollaborator(projectId: string, request: RemoveCollaboratorRequest): Observable<Project> {
     return this.http.request<Project>('delete', `${this.apiUrl}/${projectId}/collaborators`, {
       headers: this.getHeaders(),
-      body: request
+      body: request,
     });
   }
 }

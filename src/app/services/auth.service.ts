@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { UserRequest, LoginRequest, LoginResponse, UserResponse } from '../models/user.model';
+import { environment } from '../../environments/environment';
 
 /**
  * Servizio per la gestione dell'autenticazione
@@ -11,7 +12,7 @@ import { UserRequest, LoginRequest, LoginResponse, UserResponse } from '../model
   providedIn: 'root',
 })
 export class AuthService {
-  private readonly apiUrl = process.env['NG_APP_API_URL'] || 'http://localhost:8080/api';
+  private readonly apiUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) {}
 
@@ -21,9 +22,9 @@ export class AuthService {
    * @returns Observable con token e dati utente
    */
   register(userRequest: UserRequest): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(`${this.apiUrl}/auth/register`, userRequest).pipe(
-      tap(response => this.saveAuthData(response))
-    );
+    return this.http
+      .post<LoginResponse>(`${this.apiUrl}/auth/register`, userRequest)
+      .pipe(tap((response) => this.saveAuthData(response)));
   }
 
   /**
@@ -32,9 +33,9 @@ export class AuthService {
    * @returns Observable con token e dati utente
    */
   login(loginRequest: LoginRequest): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(`${this.apiUrl}/auth/login`, loginRequest).pipe(
-      tap(response => this.saveAuthData(response))
-    );
+    return this.http
+      .post<LoginResponse>(`${this.apiUrl}/auth/login`, loginRequest)
+      .pipe(tap((response) => this.saveAuthData(response)));
   }
 
   /**
