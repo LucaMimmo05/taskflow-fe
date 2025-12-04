@@ -2,13 +2,17 @@
 @import '../../../styles/mixins';
 
 .profile-page {
-  padding: $spacing-4;
-  height: 100%;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  padding: $spacing-6;
+  min-height: 100%;
+  box-sizing: border-box;
 }
 
 .profile-header {
   margin-bottom: $spacing-6;
+  flex-shrink: 0;
+  width: 100%;
 
   h1 {
     font-size: 2rem;
@@ -35,9 +39,15 @@
 
 .profile-content {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: $spacing-6;
-  max-width: 800px;
+  width: 100%;
+  flex: 1;
+  padding-bottom: $spacing-6;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
 }
 
 .profile-card {
@@ -46,7 +56,9 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
   padding: $spacing-6;
   overflow: hidden;
-
+  flex: 1;
+  height: fit-content;
+    
   body.light & {
     border-color: rgba(0, 0, 0, 0.1);
   }
@@ -222,4 +234,3 @@
   font-size: 0.9375rem;
   margin-top: $spacing-2;
 }
-

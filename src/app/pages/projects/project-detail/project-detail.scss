@@ -52,6 +52,7 @@
 }
 
 .back-btn {
+    display: flex;
   @include glass(0.15, 0.08);
   border: none;
   border-radius: $radius-lg;
