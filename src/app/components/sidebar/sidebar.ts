@@ -1,8 +1,10 @@
 import { Component, OnInit, HostListener, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
+import { forkJoin } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
 import { ProjectService } from '../../services/project.service';
+import { TaskService } from '../../services/task.service';
 import { SidebarService } from '../../services/sidebar.service';
 import { UserResponse } from '../../models/user.model';
 import { Project } from '../../models/project.model';
@@ -17,6 +19,7 @@ import { Project } from '../../models/project.model';
 export class Sidebar implements OnInit {
   user: UserResponse | null = null;
   projects: Project[] = [];
+  projectTaskCounts: Map<string, number> = new Map();
   loadingProjects = true;
   isCollapsed = false;
   showSettingsPopup = false;
@@ -35,6 +38,7 @@ export class Sidebar implements OnInit {
   constructor(
     private authService: AuthService,
     private projectService: ProjectService,
+    private taskService: TaskService,
     private router: Router,
     private sidebarService: SidebarService,
     private elementRef: ElementRef
@@ -58,12 +62,34 @@ export class Sidebar implements OnInit {
     this.projectService.getProjects().subscribe({
       next: (projects) => {
         this.projects = projects;
+        this.loadTaskCounts(projects);
         this.loadingProjects = false;
       },
       error: () => {
         this.loadingProjects = false;
       },
     });
+  }
+
+  loadTaskCounts(projects: Project[]): void {
+    if (projects.length === 0) return;
+
+    const taskRequests = projects.map((project) => this.taskService.getTasksByProject(project.id));
+
+    forkJoin(taskRequests).subscribe({
+      next: (tasksArrays) => {
+        tasksArrays.forEach((tasks, index) => {
+          this.projectTaskCounts.set(projects[index].id, tasks.length);
+        });
+      },
+      error: () => {
+        // In caso di errore, non mostrare il conteggio
+      },
+    });
+  }
+
+  getTaskCount(projectId: string): number {
+    return this.projectTaskCounts.get(projectId) || 0;
   }
 
   getProjectColor(index: number): string {
@@ -112,7 +138,7 @@ export class Sidebar implements OnInit {
     const target = event.target as HTMLElement;
     const clickedInsidePopup = target.closest('.settings-popup');
     const clickedOnButton = target.closest('.user-menu-btn');
-    
+
     // Chiudi solo se il click è fuori dal popup e fuori dal bottone
     if (!clickedInsidePopup && !clickedOnButton) {
       this.showSettingsPopup = false;

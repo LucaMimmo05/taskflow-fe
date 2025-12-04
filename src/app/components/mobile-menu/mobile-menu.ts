@@ -1,4 +1,13 @@
-import { Component, OnInit, OnDestroy, HostListener, ElementRef, Input, Output, EventEmitter } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  HostListener,
+  ElementRef,
+  Input,
+  Output,
+  EventEmitter,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router, NavigationEnd } from '@angular/router';
@@ -33,6 +42,7 @@ export class MobileMenu implements OnInit, OnDestroy {
 
   user: UserResponse | null = null;
   projects: Project[] = [];
+  projectTaskCounts: Map<string, number> = new Map();
   loadingProjects = true;
   searchQuery = '';
   searchResults: SearchResult[] = [];
@@ -72,11 +82,9 @@ export class MobileMenu implements OnInit, OnDestroy {
     });
 
     // Close menu on navigation
-    this.router.events
-      .pipe(filter((event) => event instanceof NavigationEnd))
-      .subscribe(() => {
-        this.closeMenu.emit();
-      });
+    this.router.events.pipe(filter((event) => event instanceof NavigationEnd)).subscribe(() => {
+      this.closeMenu.emit();
+    });
   }
 
   ngOnDestroy(): void {
@@ -95,12 +103,34 @@ export class MobileMenu implements OnInit, OnDestroy {
     this.projectService.getProjects().subscribe({
       next: (projects) => {
         this.projects = projects;
+        this.loadTaskCounts(projects);
         this.loadingProjects = false;
       },
       error: () => {
         this.loadingProjects = false;
       },
     });
+  }
+
+  loadTaskCounts(projects: Project[]): void {
+    if (projects.length === 0) return;
+
+    const taskRequests = projects.map((project) => this.taskService.getTasksByProject(project.id));
+
+    forkJoin(taskRequests).subscribe({
+      next: (tasksArrays) => {
+        tasksArrays.forEach((tasks, index) => {
+          this.projectTaskCounts.set(projects[index].id, tasks.length);
+        });
+      },
+      error: () => {
+        // In caso di errore, non mostrare il conteggio
+      },
+    });
+  }
+
+  getTaskCount(projectId: string): number {
+    return this.projectTaskCounts.get(projectId) || 0;
   }
 
   loadData(): void {
@@ -244,4 +274,3 @@ export class MobileMenu implements OnInit, OnDestroy {
       .slice(0, 2);
   }
 }
-

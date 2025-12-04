@@ -75,41 +75,42 @@
         <nav class="mobile-menu-nav">
             <ul class="nav-list">
                 @for (item of menuItems; track item.route) {
-                    <li class="nav-item">
-                        <a [routerLink]="item.route" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-link" (click)="closeMenu.emit()">
-                            @if (item.icon === 'home') {
-                                <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
-                                </svg>
-                            }
-                            @if (item.icon === 'calendar') {
-                                <svg class="nav-icon" width="20" height="20"
-                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                                    <line x1="16" y1="2" x2="16" y2="6"></line>
-                                    <line x1="8" y1="2" x2="8" y2="6"></line>
-                                    <line x1="3" y1="10" x2="21" y2="10"></line>
-                                </svg>
-                            }
-                            @if (item.icon === 'folder') {
-                                <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z">
-                                    </path>
-                                </svg>
-                            }
-                            @if (item.icon === 'check-square') {
-                                <svg class="nav-icon" width="20" height="20"
-                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <polyline points="9 11 12 14 22 4"></polyline>
-                                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
-                                </svg>
-                            }
-                            <span class="nav-label">{{ item.label }}</span>
-                        </a>
-                    </li>
+                <li class="nav-item">
+                    <a [routerLink]="item.route" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"
+                        class="nav-link" (click)="closeMenu.emit()">
+                        @if (item.icon === 'home') {
+                        <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                        </svg>
+                        }
+                        @if (item.icon === 'calendar') {
+                        <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                        }
+                        @if (item.icon === 'folder') {
+                        <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z">
+                            </path>
+                        </svg>
+                        }
+                        @if (item.icon === 'check-square') {
+                        <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <polyline points="9 11 12 14 22 4"></polyline>
+                            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                        </svg>
+                        }
+                        <span class="nav-label">{{ item.label }}</span>
+                    </a>
+                </li>
                 }
             </ul>
 
@@ -118,7 +119,8 @@
                 <div class="nav-section-header">
                     <span class="section-title">I miei progetti</span>
                     <button class="add-project-btn" (click)="goToAllProjects()" aria-label="Vedi tutti i progetti">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
                             <line x1="12" y1="5" x2="12" y2="19"></line>
                             <line x1="5" y1="12" x2="19" y2="12"></line>
                         </svg>
@@ -126,31 +128,29 @@
                 </div>
 
                 @if (loadingProjects) {
-                    <div class="projects-loading">
-                        <div class="mini-spinner"></div>
-                    </div>
+                <div class="projects-loading">
+                    <div class="mini-spinner"></div>
+                </div>
                 }
 
                 @if (!loadingProjects && projects.length === 0) {
-                    <div class="projects-empty">
-                        <span>Nessun progetto</span>
-                    </div>
+                <div class="projects-empty">
+                    <span>Nessun progetto</span>
+                </div>
                 }
 
                 @if (!loadingProjects && projects.length > 0) {
-                    <ul class="nav-list">
-                        @for (project of projects; track project.id; let i = $index) {
-                            <li class="nav-item">
-                                <a class="nav-link project-link" (click)="goToProject(project)">
-                                    <span class="project-color" [style.background-color]="getProjectColor(i)"></span>
-                                    <span class="nav-label project-name">{{ project.title }}</span>
-                                    @if (project.phases) {
-                                        <span class="project-task-count">{{ project.phases.length }}</span>
-                                    }
-                                </a>
-                            </li>
-                        }
-                    </ul>
+                <ul class="nav-list">
+                    @for (project of projects; track project.id; let i = $index) {
+                    <li class="nav-item">
+                        <a class="nav-link project-link" (click)="goToProject(project)">
+                            <span class="project-color" [style.background-color]="getProjectColor(i)"></span>
+                            <span class="nav-label project-name">{{ project.title }}</span>
+                            <span class="project-task-count">{{ getTaskCount(project.id) }}</span>
+                        </a>
+                    </li>
+                    }
+                </ul>
                 }
             </div>
         </nav>
@@ -186,4 +186,3 @@
         </div>
     </div>
 </div>
-
