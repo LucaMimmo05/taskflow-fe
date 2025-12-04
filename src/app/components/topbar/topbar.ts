@@ -17,6 +17,15 @@ interface SearchResult {
   color?: string;
 }
 
+interface Notification {
+  id: string;
+  type: 'project' | 'task' | 'info';
+  title: string;
+  message: string;
+  read: boolean;
+  createdAt: Date;
+}
+
 @Component({
   selector: 'app-topbar',
   standalone: true,
@@ -29,6 +38,10 @@ export class Topbar implements OnInit, OnDestroy {
   searchResults: SearchResult[] = [];
   showResults = false;
   isSearching = false;
+
+  // Notifications
+  notifications: Notification[] = [];
+  showNotifications = false;
 
   private searchSubject = new Subject<string>();
   private allTasks: Task[] = [];
@@ -60,6 +73,7 @@ export class Topbar implements OnInit, OnDestroy {
   onDocumentClick(event: Event): void {
     if (!this.elementRef.nativeElement.contains(event.target)) {
       this.showResults = false;
+      this.showNotifications = false;
     }
   }
 
@@ -190,5 +204,61 @@ export class Topbar implements OnInit, OnDestroy {
   private getProjectColorById(projectId: string): string {
     const index = this.allProjects.findIndex((p) => p.id === projectId);
     return this.getProjectColor(index >= 0 ? index : 0);
+  }
+
+  // Notifications management
+  toggleNotifications(): void {
+    this.showNotifications = !this.showNotifications;
+  }
+
+  clearNotifications(): void {
+    this.notifications = [];
+    this.showNotifications = false;
+  }
+
+  formatTime(date: Date | string): string {
+    const now = new Date();
+    const notifDate = new Date(date);
+    const diffMs = now.getTime() - notifDate.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return 'Proprio ora';
+    if (diffMins < 60) return `${diffMins}m fa`;
+    if (diffHours < 24) return `${diffHours}h fa`;
+    if (diffDays < 7) return `${diffDays}d fa`;
+    
+    return notifDate.toLocaleDateString('it-IT');
+  }
+
+  // Add mock notifications for demo (will be replaced with backend data)
+  addMockNotifications(): void {
+    this.notifications = [
+      {
+        id: '1',
+        type: 'project',
+        title: 'Nuovo progetto condiviso',
+        message: 'Marco ha condiviso il progetto "TaskFlow" con te',
+        read: false,
+        createdAt: new Date(Date.now() - 5 * 60000), // 5 minutes ago
+      },
+      {
+        id: '2',
+        type: 'task',
+        title: 'Task assegnata',
+        message: 'Ti è stata assegnata la task "Implementare login"',
+        read: false,
+        createdAt: new Date(Date.now() - 30 * 60000), // 30 minutes ago
+      },
+      {
+        id: '3',
+        type: 'info',
+        title: 'Aggiornamento',
+        message: 'Sono disponibili nuove funzionalità nell\'app',
+        read: true,
+        createdAt: new Date(Date.now() - 2 * 3600000), // 2 hours ago
+      },
+    ];
   }
 }
