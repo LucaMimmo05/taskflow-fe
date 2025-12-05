@@ -44,6 +44,17 @@ export class TaskService {
   }
 
   /**
+   * Ottiene un singolo task per ID
+   * @param taskId ID del task
+   * @returns Observable con il task
+   */
+  getTaskById(taskId: string): Observable<Task> {
+    return this.http.get<Task>(`${this.taskApiUrl}/single/${taskId}`, {
+      headers: this.getHeaders()
+    });
+  }
+
+  /**
    * Crea un nuovo task
    * @param projectId ID del progetto
    * @param task Dati del task da creare
