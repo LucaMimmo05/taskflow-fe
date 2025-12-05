@@ -7,6 +7,7 @@ import { ProjectDetailComponent } from './pages/projects/project-detail/project-
 import { CalendarPage } from './pages/calendar/calendar';
 import { TasksPage } from './pages/tasks/tasks';
 import { ProfilePage } from './pages/profile/profile';
+import { NotificationsPage } from './pages/notifications/notifications';
 import { MainLayout } from './components/main-layout/main-layout';
 import { authGuard } from './guards/auth.guard';
 import { guestGuard } from './guards/guest.guard';
@@ -25,6 +26,7 @@ export const routes: Routes = [
       { path: 'calendar', component: CalendarPage },
       { path: 'tasks', component: TasksPage },
       { path: 'profile', component: ProfilePage },
+      { path: 'notifications', component: NotificationsPage },
     ],
   },
 ];
