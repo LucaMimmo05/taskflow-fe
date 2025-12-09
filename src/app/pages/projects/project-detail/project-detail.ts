@@ -66,7 +66,7 @@ export class ProjectDetailComponent implements OnInit {
   // Phase Modal
   showPhaseModal = false;
   editingPhase: Phase | null = null;
-  phaseForm = { title: '' };
+  phaseTitle = '';
   savingPhase = false;
 
   // Delete Phase Confirmation
@@ -108,7 +108,7 @@ export class ProjectDetailComponent implements OnInit {
     private taskService: TaskService,
     private userService: UserService,
     private authService: AuthService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     const user = this.authService.getCurrentUser();
@@ -230,15 +230,15 @@ export class ProjectDetailComponent implements OnInit {
   }
 
   confirmLeaveProject(): void {
-    if(!this.project) return;
-    if(confirm('Sei sicuro di voler lasciare questo progetto?')) {
-        this.projectService.removeCollaborator(this.project.id, { userId: this.currentUserId! })
+    if (!this.project) return;
+    if (confirm('Sei sicuro di voler lasciare questo progetto?')) {
+      this.projectService.removeCollaborator(this.project.id, { userId: this.currentUserId! })
         .subscribe({
-            next: () => this.router.navigate(['/projects']),
-            error: (err) => {
-                console.error(err);
-                this.error = "Errore durante l'uscita dal progetto";
-            }
+          next: () => this.router.navigate(['/projects']),
+          error: (err) => {
+            console.error(err);
+            this.error = "Errore durante l'uscita dal progetto";
+          }
         });
     }
   }
@@ -250,7 +250,7 @@ export class ProjectDetailComponent implements OnInit {
 
   toggleAssignee(userId: string): void {
     if (!this.taskForm.assignees) this.taskForm.assignees = [];
-    
+
     const index = this.taskForm.assignees.indexOf(userId);
     if (index >= 0) {
       this.taskForm.assignees.splice(index, 1);
@@ -566,14 +566,14 @@ export class ProjectDetailComponent implements OnInit {
       return;
     }
     this.editingPhase = null;
-    this.phaseForm.title = '';
+    this.phaseTitle = ''; // Create new object to ensure binding updates
     this.error = null;
     this.showPhaseModal = true;
   }
 
   openEditPhaseModal(phase: Phase): void {
     this.editingPhase = phase;
-    this.phaseForm.title = phase.title;
+    this.phaseTitle = phase.title;
     this.error = null;
     this.showPhaseModal = true;
   }
@@ -582,12 +582,12 @@ export class ProjectDetailComponent implements OnInit {
     if (this.savingPhase) return;
     this.showPhaseModal = false;
     this.editingPhase = null;
-    this.phaseForm.title = '';
+    this.phaseTitle = '';
   }
 
   submitPhase(): void {
     if (!this.project) return;
-    if (!this.phaseForm.title.trim()) {
+    if (!this.phaseTitle.trim()) {
       this.error = 'Il nome della fase è obbligatorio';
       return;
     }
@@ -598,7 +598,7 @@ export class ProjectDetailComponent implements OnInit {
     if (this.editingPhase) {
       // Update existing phase
       const updatedPhases = this.project.phases.map((p) =>
-        p.id === this.editingPhase!.id ? { ...p, title: this.phaseForm.title.trim() } : p
+        p.id === this.editingPhase!.id ? { ...p, title: this.phaseTitle.trim() } : p
       );
 
       this.projectService.updateProject(this.project.id, { phases: updatedPhases }).subscribe({
@@ -619,7 +619,7 @@ export class ProjectDetailComponent implements OnInit {
       const maxPosition = this.project.phases.reduce((max, p) => Math.max(max, p.position), 0);
       const newPhase: Phase = {
         id: crypto.randomUUID(),
-        title: this.phaseForm.title.trim(),
+        title: this.phaseTitle.trim(),
         position: maxPosition + 1,
       };
 
@@ -648,6 +648,7 @@ export class ProjectDetailComponent implements OnInit {
 
   cancelDeletePhase(): void {
     this.phaseToDelete = null;
+    this.showDeletePhaseConfirm = false;
   }
 
   movePhaseLeft(phase: Phase): void {

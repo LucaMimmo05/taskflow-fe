@@ -1,0 +1,66 @@
+<div class="dialog-container">
+  <div class="dialog-header">
+    <div class="header-content">
+      <h2 mat-dialog-title>{{ task.title }}</h2>
+      <div class="project-badge" [style.background-color]="task.projectColor">
+        {{ task.projectTitle }}
+      </div>
+    </div>
+    <button mat-icon-button (click)="close()" class="close-btn">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <mat-dialog-content class="dialog-content">
+    <div class="meta-row">
+      <div class="meta-item">
+        <span class="label">Stato</span>
+        <span class="value status-badge">{{ task.status }}</span>
+      </div>
+      <div class="meta-item">
+        <span class="label">Priorità</span>
+        <span class="value priority-badge" [class]="getPriorityClass(task.priority)">
+          {{ getPriorityLabel(task.priority) }}
+        </span>
+      </div>
+      <div class="meta-item">
+        <span class="label">Scadenza</span>
+        <span class="value date-badge">
+          <mat-icon class="small-icon">event</mat-icon>
+          {{ formatDate(task.dueDate) }}
+        </span>
+      </div>
+    </div>
+
+    <div class="description-section" *ngIf="task.description">
+      <h3>Descrizione</h3>
+      <p>{{ task.description }}</p>
+    </div>
+
+    <div class="labels-section" *ngIf="task.labels && task.labels.length > 0">
+      <h3>Etichette</h3>
+      <div class="chips-container">
+        <span *ngFor="let label of task.labels" class="custom-chip" [style.background-color]="label.color">
+          {{ label.title }}
+        </span>
+      </div>
+    </div>
+
+    <div class="assignees-section" *ngIf="task.assignees && task.assignees.length > 0">
+      <h3>Assegnatari</h3>
+      <div class="assignees-list">
+        <div *ngFor="let assignee of task.assignees" class="assignee-item">
+          <!-- Placeholder avatar if no image -->
+          <div class="avatar-circle">
+            {{ assignee.username?.charAt(0) | uppercase }}
+          </div>
+          <span>{{ assignee.username }}</span>
+        </div>
+      </div>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="close()" class="btn-close">Chiudi</button>
+  </mat-dialog-actions>
+</div>
