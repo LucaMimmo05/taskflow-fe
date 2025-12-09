@@ -32,6 +32,7 @@ export class TasksPage implements OnInit {
   searchQuery = '';
   selectedProject = '';
   selectedStatus = '';
+  selectedLabel = '';
 
   // Colors for projects
   projectColors = ['#8b5cf6', '#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#ec4899', '#06b6d4'];
@@ -145,6 +146,12 @@ export class TasksPage implements OnInit {
         return false;
       }
 
+      // Label filter
+      if (this.selectedLabel) {
+        const hasLabel = task.labels?.some(l => l.id === this.selectedLabel);
+        if (!hasLabel) return false;
+      }
+
       return true;
     });
   }
@@ -153,7 +160,20 @@ export class TasksPage implements OnInit {
     this.searchQuery = '';
     this.selectedProject = '';
     this.selectedStatus = '';
+    this.selectedLabel = '';
     this.filteredTasks = [...this.allTasks];
+  }
+
+  get allLabels(): { id: string; title: string; color: string }[] {
+    const labelMap = new Map<string, { id: string; title: string; color: string }>();
+    this.projects.forEach(p => {
+      p.labels?.forEach(l => {
+        if (!labelMap.has(l.id)) {
+          labelMap.set(l.id, l);
+        }
+      });
+    });
+    return Array.from(labelMap.values());
   }
 
   goToTask(task: TaskWithProject): void {

@@ -38,7 +38,12 @@
                 <option *ngFor="let project of projects" [value]="project.id">{{ project.title }}</option>
             </select>
 
-            <button class="clear-btn" *ngIf="searchQuery || selectedProject" (click)="clearFilters()">
+            <select [(ngModel)]="selectedLabel" (change)="applyFilters()">
+                <option value="">Tutte le etichette</option>
+                <option *ngFor="let label of allLabels" [value]="label.id">{{ label.title }}</option>
+            </select>
+
+            <button class="clear-btn" *ngIf="searchQuery || selectedProject || selectedLabel" (click)="clearFilters()">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <line x1="18" y1="6" x2="6" y2="18" />
                     <line x1="6" y1="6" x2="18" y2="18" />
@@ -110,6 +115,11 @@
                             <line x1="3" y1="10" x2="21" y2="10" />
                         </svg>
                         {{ formatDate(task.dueDate) }}
+                    </span>
+                </div>
+                <div class="task-labels" *ngIf="task.labels && task.labels.length > 0">
+                    <span *ngFor="let label of task.labels" class="task-label" [style.background-color]="label.color">
+                        {{ label.title }}
                     </span>
                 </div>
             </div>
