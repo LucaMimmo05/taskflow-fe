@@ -3,6 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Task, CreateTaskRequest, UpdateTaskRequest } from '../models/task.model';
 import { AuthService } from './auth.service';
+import { environment } from '../../environments/environment';
 
 /**
  * Servizio per la gestione dei task
@@ -12,12 +13,9 @@ import { AuthService } from './auth.service';
   providedIn: 'root',
 })
 export class TaskService {
-  private readonly taskApiUrl = 'http://localhost:8080/api/task';
+  private readonly apiUrl = `${environment.apiUrl}/task`;
 
-  constructor(
-    private http: HttpClient,
-    private authService: AuthService
-  ) {}
+  constructor(private http: HttpClient, private authService: AuthService) {}
 
   /**
    * Crea gli headers HTTP con il token di autenticazione
@@ -38,19 +36,8 @@ export class TaskService {
    * @returns Observable con array di task
    */
   getTasksByProject(projectId: string): Observable<Task[]> {
-    return this.http.get<Task[]>(`${this.taskApiUrl}/${projectId}`, {
-      headers: this.getHeaders()
-    });
-  }
-
-  /**
-   * Ottiene un singolo task per ID
-   * @param taskId ID del task
-   * @returns Observable con il task
-   */
-  getTaskById(taskId: string): Observable<Task> {
-    return this.http.get<Task>(`${this.taskApiUrl}/single/${taskId}`, {
-      headers: this.getHeaders()
+    return this.http.get<Task[]>(`${this.apiUrl}/${projectId}`, {
+      headers: this.getHeaders(),
     });
   }
 
@@ -61,8 +48,8 @@ export class TaskService {
    * @returns Observable con il task creato
    */
   createTask(projectId: string, task: CreateTaskRequest): Observable<Task> {
-    return this.http.post<Task>(`${this.taskApiUrl}/${projectId}`, task, {
-      headers: this.getHeaders()
+    return this.http.post<Task>(`${this.apiUrl}/${projectId}`, task, {
+      headers: this.getHeaders(),
     });
   }
 
@@ -73,8 +60,8 @@ export class TaskService {
    * @returns Observable con il task aggiornato
    */
   updateTask(taskId: string, updates: UpdateTaskRequest): Observable<Task> {
-    return this.http.put<Task>(`${this.taskApiUrl}/${taskId}`, updates, {
-      headers: this.getHeaders()
+    return this.http.put<Task>(`${this.apiUrl}/${taskId}`, updates, {
+      headers: this.getHeaders(),
     });
   }
 
@@ -84,8 +71,8 @@ export class TaskService {
    * @returns Observable con messaggio di conferma
    */
   deleteTask(taskId: string): Observable<{ message: string }> {
-    return this.http.delete<{ message: string }>(`${this.taskApiUrl}/${taskId}`, {
-      headers: this.getHeaders()
+    return this.http.delete<{ message: string }>(`${this.apiUrl}/${taskId}`, {
+      headers: this.getHeaders(),
     });
   }
 }
