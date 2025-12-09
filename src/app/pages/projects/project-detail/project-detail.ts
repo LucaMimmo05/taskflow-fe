@@ -4,10 +4,10 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ProjectService } from '../../../services/project.service';
 import { TaskService } from '../../../services/task.service';
-import { AuthService } from '../../../services/auth.service';
 import { Project, Phase, Label, Collaborator } from '../../../models/project.model';
 import { Task, CreateTaskRequest, UpdateTaskRequest } from '../../../models/task.model';
 import { UserService } from '../../../services/user.service';
+import { AuthService } from '../../../services/auth.service';
 import { OrderByPipe } from '../../../pipes/order-by.pipe';
 
 @Component({
@@ -24,9 +24,9 @@ export class ProjectDetailComponent implements OnInit {
   error: string | null = null;
   currentUserId: string | null = null;
 
-  // Task Filters
-  filterLabel: string = '';
-  filterAssignee: string = '';
+  // Filters
+  filterLabel: string | null = null;
+  filterAssignee: string | null = null;
 
   // Task Modal
   showTaskModal = false;
@@ -101,10 +101,6 @@ export class ProjectDetailComponent implements OnInit {
   labelToDelete: Label | null = null;
   deletingLabel = false;
 
-  // Leave Project
-  showLeaveConfirm = false;
-  leavingProject = false;
-
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -112,12 +108,12 @@ export class ProjectDetailComponent implements OnInit {
     private taskService: TaskService,
     private userService: UserService,
     private authService: AuthService
-  ) {
-    const user = this.authService.getCurrentUser();
-    this.currentUserId = user?.id || null;
-  }
+  ) {}
 
   ngOnInit(): void {
+    const user = this.authService.getCurrentUser();
+    this.currentUserId = user ? user.id : null;
+
     // Subscribe to route params to handle project switching
     this.route.paramMap.subscribe((params) => {
       const projectId = params.get('id');
@@ -129,14 +125,6 @@ export class ProjectDetailComponent implements OnInit {
         this.loading = false;
       }
     });
-  }
-
-  removeFilter(filterType: 'label' | 'assignee'): void {
-    if (filterType === 'label') {
-      this.filterLabel = '';
-    } else if (filterType === 'assignee') {
-      this.filterAssignee = '';
-    }
   }
 
   resetState(): void {
@@ -159,6 +147,8 @@ export class ProjectDetailComponent implements OnInit {
     this.loading = true;
     this.projectService.getProject(projectId).subscribe({
       next: (project) => {
+        console.log('Project loaded:', project);
+        console.log('Collaborators:', project.collaborators);
         this.project = project;
         this.loadTasks(projectId);
       },
@@ -186,6 +176,87 @@ export class ProjectDetailComponent implements OnInit {
 
   getTasksByPhase(phaseId: string): Task[] {
     return this.tasks.filter((t) => t.phaseId === phaseId);
+  }
+
+  getFilteredTasksByPhase(phaseId: string): Task[] {
+    return this.tasks.filter((t) => {
+      // Phase check
+      if (t.phaseId !== phaseId) return false;
+
+      // Label check
+      if (this.filterLabel && !t.labels.some((l) => l.id === this.filterLabel)) return false;
+
+      // Assignee check
+      if (this.filterAssignee) {
+        if (this.filterAssignee === 'unassigned') {
+          if (t.assignees.length > 0) return false;
+        } else {
+          if (!t.assignees.some((a) => a.userId === this.filterAssignee)) return false;
+        }
+      }
+
+      return true;
+    });
+  }
+
+  removeFilter(type: 'label' | 'assignee'): void {
+    if (type === 'label') this.filterLabel = null;
+    if (type === 'assignee') this.filterAssignee = null;
+  }
+
+  clearFilters(): void {
+    this.filterLabel = null;
+    this.filterAssignee = null;
+  }
+
+  isCurrentUserCreator(): boolean {
+    if (!this.project || !this.currentUserId) return false;
+    // Assuming creator is stored in project.creatorId or we check collaborators with role 'creator'
+    const creator = this.project.collaborators.find((c) => c.role === 'creator');
+    return creator?.userId === this.currentUserId;
+  }
+
+  canEditTask(task: Task): boolean {
+    // Implement logic: creator, admin, or assignee can edit?
+    // For now, simplify: if user is creator/admin or if task has no assignees or if user is assignee
+    if (!this.project || !this.currentUserId) return false;
+
+    // Project owner/admin can always edit
+    const myRole = this.project.collaborators.find(c => c.userId === this.currentUserId)?.role;
+    if (myRole === 'creator' || myRole === 'admin') return true;
+
+    // If I am assigned to the task
+    return task.assignees.some(a => a.userId === this.currentUserId);
+  }
+
+  confirmLeaveProject(): void {
+    if(!this.project) return;
+    if(confirm('Sei sicuro di voler lasciare questo progetto?')) {
+        this.projectService.removeCollaborator(this.project.id, { userId: this.currentUserId! })
+        .subscribe({
+            next: () => this.router.navigate(['/projects']),
+            error: (err) => {
+                console.error(err);
+                this.error = "Errore durante l'uscita dal progetto";
+            }
+        });
+    }
+  }
+
+  // Task Assignee Management implementation
+  isAssigneeSelected(userId: string): boolean {
+    return this.taskForm.assignees?.includes(userId) ?? false;
+  }
+
+  toggleAssignee(userId: string): void {
+    if (!this.taskForm.assignees) this.taskForm.assignees = [];
+    
+    const index = this.taskForm.assignees.indexOf(userId);
+    if (index >= 0) {
+      this.taskForm.assignees.splice(index, 1);
+    } else {
+      this.taskForm.assignees.push(userId);
+    }
   }
 
   // Task CRUD Operations
@@ -624,6 +695,7 @@ export class ProjectDetailComponent implements OnInit {
     if (!this.project) return -1;
     const sortedPhases = [...this.project.phases].sort((a, b) => a.position - b.position);
     return sortedPhases.findIndex((p) => p.id === phase.id);
+    this.showDeletePhaseConfirm = false;
   }
 
   deletePhase(): void {
@@ -780,91 +852,6 @@ export class ProjectDetailComponent implements OnInit {
       error: (err) => {
         this.error = 'Errore eliminazione etichetta';
         this.deletingLabel = false;
-        console.error(err);
-      },
-    });
-  }
-
-  // Assignee Selection
-  toggleAssignee(userId: string): void {
-    if (!this.taskForm.assignees) {
-      this.taskForm.assignees = [];
-    }
-    const index = this.taskForm.assignees.indexOf(userId);
-    if (index >= 0) {
-      this.taskForm.assignees.splice(index, 1);
-    } else {
-      this.taskForm.assignees.push(userId);
-    }
-  }
-
-  isAssigneeSelected(userId: string): boolean {
-    return this.taskForm.assignees?.includes(userId) ?? false;
-  }
-
-  // Permission Check - can edit if unassigned or assigned to current user
-  canEditTask(task: Task): boolean {
-    if (!task.assignees || task.assignees.length === 0) {
-      return true; // Unassigned tasks can be edited by anyone
-    }
-    return task.assignees.some(a => a.userId === this.currentUserId);
-  }
-
-  // Current User Check
-  isCurrentUserCreator(): boolean {
-    if (!this.project || !this.currentUserId) return false;
-    const currentCollaborator = this.project.collaborators.find(c => c.userId === this.currentUserId);
-    return currentCollaborator?.role === 'creator';
-  }
-
-  // Task Filtering
-  getFilteredTasksByPhase(phaseId: string): Task[] {
-    let filtered = this.tasks.filter((t) => t.phaseId === phaseId);
-    
-    // Filter by label
-    if (this.filterLabel) {
-      filtered = filtered.filter(t => t.labels.some(l => l.id === this.filterLabel));
-    }
-    
-    // Filter by assignee
-    if (this.filterAssignee) {
-      if (this.filterAssignee === 'unassigned') {
-        filtered = filtered.filter(t => !t.assignees || t.assignees.length === 0);
-      } else {
-        filtered = filtered.filter(t => t.assignees.some(a => a.userId === this.filterAssignee));
-      }
-    }
-    
-    return filtered;
-  }
-
-  clearFilters(): void {
-    this.filterLabel = '';
-    this.filterAssignee = '';
-  }
-
-  // Leave Project
-  confirmLeaveProject(): void {
-    this.showLeaveConfirm = true;
-  }
-
-  cancelLeaveProject(): void {
-    this.showLeaveConfirm = false;
-  }
-
-  leaveProject(): void {
-    if (!this.project || !this.currentUserId) return;
-
-    this.leavingProject = true;
-    this.projectService.removeCollaborator(this.project.id, { userId: this.currentUserId }).subscribe({
-      next: () => {
-        this.leavingProject = false;
-        this.showLeaveConfirm = false;
-        this.router.navigate(['/projects']);
-      },
-      error: (err) => {
-        this.error = err.error?.message || 'Errore durante l\'uscita dal progetto';
-        this.leavingProject = false;
         console.error(err);
       },
     });

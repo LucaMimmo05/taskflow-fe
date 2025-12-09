@@ -364,45 +364,62 @@
     <div class="modal-backdrop" *ngIf="showCollaboratorsModal">
         <div class="modal">
             <div class="modal-header">
-                <h2>Collaboratori</h2>
+                <h2>Gestisci Collaboratori</h2>
                 <button class="close-btn" (click)="closeCollaboratorsModal()" [disabled]="addingCollaborator">×</button>
             </div>
             <div class="modal-body">
                 <div *ngIf="error" class="error mb">{{ error }}</div>
 
                 <!-- Add Collaborator Form -->
-                <div class="add-collaborator-form">
-                    <input type="email" [(ngModel)]="collaboratorEmail" placeholder="Email del collaboratore"
-                        [disabled]="addingCollaborator" />
-                    <button class="primary" (click)="addCollaborator()"
-                        [disabled]="addingCollaborator || !collaboratorEmail.trim()">
-                        <span *ngIf="!addingCollaborator">Aggiungi</span>
-                        <span *ngIf="addingCollaborator">...</span>
-                    </button>
+                <div class="form-section">
+                    <label class="form-label">Aggiungi Collaboratore</label>
+                    <div class="add-collaborator-form">
+                        <input type="email" [(ngModel)]="collaboratorEmail"
+                            placeholder="Inserisci l'email del collaboratore" [disabled]="addingCollaborator"
+                            class="collaborator-input" />
+                        <button class="primary add-collab-btn" (click)="addCollaborator()"
+                            [disabled]="addingCollaborator || !collaboratorEmail.trim()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <line x1="12" y1="5" x2="12" y2="19" />
+                                <line x1="5" y1="12" x2="19" y2="12" />
+                            </svg>
+                            <span>Aggiungi</span>
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Collaborators List -->
-                <div class="collaborators-list">
-                    <div *ngFor="let collab of project?.collaborators" class="collaborator-item">
-                        <div class="collaborator-avatar">
-                            {{ collab.displayName.charAt(0).toUpperCase() }}
+                <div class="form-section">
+                    <label class="form-label">Collaboratori ({{ project?.collaborators?.length || 0 }})</label>
+                    <div class="collaborators-list">
+                        <div *ngFor="let collab of project?.collaborators" class="collaborator-item">
+                            <div class="collaborator-avatar">
+                                {{ collab?.displayName?.charAt(0)?.toUpperCase() || '?' }}
+                            </div>
+                            <div class="collaborator-info">
+                                <span class="collaborator-name">{{ collab?.displayName || 'Utente sconosciuto' }}</span>
+                                <span class="collaborator-role">{{ collab?.role === 'creator' ? 'Creatore' :
+                                    collab?.role
+                                    ===
+                                    'admin' ? 'Admin' : 'Membro' }}</span>
+                            </div>
+                            <button *ngIf="!isCreator(collab)" class="remove-collaborator-btn"
+                                (click)="removeCollaborator(collab)"
+                                [disabled]="removingCollaboratorId === collab.userId" title="Rimuovi collaboratore">
+                                <svg *ngIf="removingCollaboratorId !== collab.userId" width="16" height="16"
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="18" y1="6" x2="6" y2="18" />
+                                    <line x1="6" y1="6" x2="18" y2="18" />
+                                </svg>
+                                <span *ngIf="removingCollaboratorId === collab.userId" class="mini-spinner"></span>
+                            </button>
+                            <span *ngIf="isCreator(collab)" class="creator-badge">Creatore</span>
                         </div>
-                        <div class="collaborator-info">
-                            <span class="collaborator-name">{{ collab.displayName }}</span>
-                            <span class="collaborator-role">{{ collab.role === 'creator' ? 'Creatore' : collab.role ===
-                                'admin' ? 'Admin' : 'Membro' }}</span>
+                        <div *ngIf="!project?.collaborators || project?.collaborators?.length === 0"
+                            class="empty-collaborators">
+                            Nessun collaboratore. Aggiungi il primo!
                         </div>
-                        <button *ngIf="!isCreator(collab)" class="remove-collaborator-btn"
-                            (click)="removeCollaborator(collab)" [disabled]="removingCollaboratorId === collab.userId"
-                            title="Rimuovi collaboratore">
-                            <svg *ngIf="removingCollaboratorId !== collab.userId" width="16" height="16"
-                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <line x1="18" y1="6" x2="6" y2="18" />
-                                <line x1="6" y1="6" x2="18" y2="18" />
-                            </svg>
-                            <span *ngIf="removingCollaboratorId === collab.userId" class="mini-spinner"></span>
-                        </button>
-                        <span *ngIf="isCreator(collab)" class="creator-badge">Creatore</span>
                     </div>
                 </div>
             </div>

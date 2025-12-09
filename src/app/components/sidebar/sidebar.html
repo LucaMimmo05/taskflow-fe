@@ -68,7 +68,6 @@
                     <a class="nav-link project-link" [routerLink]="['/projects', project.id]" routerLinkActive="active">
                         <span class="project-color" [style.background-color]="getProjectColor(i)"></span>
                         <span class="nav-label project-name">{{ project.title }}</span>
-                        <span class="project-task-count">{{ getTaskCount(project.id) }}</span>
                     </a>
                 </li>
                 }
@@ -78,14 +77,6 @@
     </nav>
 
     <div class="sidebar-footer">
-        <button class="notification-btn" (click)="toggleNotificationsPopup($event)"
-            [class.active]="showNotificationsPopup" title="Notifiche">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-            </svg>
-            <span *ngIf="unreadNotificationsCount > 0" class="badge"></span>
-        </button>
 
         <div class="user-menu-btn" (click)="toggleSettingsPopup($event)">
             <div class="user-avatar avatar-gradient-1">{{ getInitials() }}</div>
@@ -136,32 +127,5 @@
         </div>
         }
 
-        <!-- Notifications Popup -->
-        @if (showNotificationsPopup) {
-        <div class="notifications-popup">
-            <div class="popup-header">
-                <h3>Notifiche</h3>
-                <div class="actions">
-                    <button class="mark-read-btn" (click)="markAllAsRead()">Segna tutte lette</button>
-                </div>
-            </div>
-            <ul class="notification-list">
-                @for (notif of notifications; track notif.id) {
-                <li class="notification-item" [class.unread]="!notif.read">
-                    <div class="notif-icon" [ngClass]="notif.type"></div>
-                    <div class="notif-content">
-                        <p>{{ notif.message }}</p>
-                        <span>{{ notif.time }}</span>
-                    </div>
-                </li>
-                }
-                @if (notifications.length === 0) {
-                <li class="empty-notifications">
-                    Nessuna notifica
-                </li>
-                }
-            </ul>
-        </div>
-        }
     </div>
 </aside>

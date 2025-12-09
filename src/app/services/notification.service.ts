@@ -4,6 +4,7 @@ import { BehaviorSubject, Observable, Subject, interval, Subscription } from 'rx
 import { switchMap, tap, catchError, map } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { AuthService } from './auth.service';
+import { environment } from '../../environments/environment';
 import {
   Notification,
   UnreadCountResponse,
@@ -20,7 +21,7 @@ import {
   providedIn: 'root',
 })
 export class NotificationService implements OnDestroy {
-  private readonly apiUrl = 'http://localhost:8080/api/notifications';
+  private readonly apiUrl = `${environment.apiUrl}/notifications`;
 
   // Observable subjects per lo stato delle notifiche
   private notificationsSubject = new BehaviorSubject<Notification[]>([]);
@@ -36,10 +37,7 @@ export class NotificationService implements OnDestroy {
   private pollingSubscription: Subscription | null = null;
   private lastUnreadCount = 0;
 
-  constructor(
-    private http: HttpClient,
-    private authService: AuthService
-  ) {}
+  constructor(private http: HttpClient, private authService: AuthService) {}
 
   ngOnDestroy(): void {
     this.stopPolling();
@@ -115,9 +113,13 @@ export class NotificationService implements OnDestroy {
    */
   markAsRead(notificationId: string): Observable<Notification> {
     return this.http
-      .put<Notification>(`${this.apiUrl}/${notificationId}/read`, {}, {
-        headers: this.getHeaders(),
-      })
+      .put<Notification>(
+        `${this.apiUrl}/${notificationId}/read`,
+        {},
+        {
+          headers: this.getHeaders(),
+        }
+      )
       .pipe(
         tap((updatedNotification) => {
           this.updateNotificationInState(updatedNotification);
@@ -136,9 +138,13 @@ export class NotificationService implements OnDestroy {
    */
   markAllAsRead(): Observable<MarkAllAsReadResponse> {
     return this.http
-      .put<MarkAllAsReadResponse>(`${this.apiUrl}/read-all`, {}, {
-        headers: this.getHeaders(),
-      })
+      .put<MarkAllAsReadResponse>(
+        `${this.apiUrl}/read-all`,
+        {},
+        {
+          headers: this.getHeaders(),
+        }
+      )
       .pipe(
         tap((response) => {
           this.markAllNotificationsAsRead();
@@ -199,7 +205,7 @@ export class NotificationService implements OnDestroy {
     if (!Array.isArray(notifications)) {
       return [];
     }
-    
+
     return [...notifications].sort((a, b) => {
       // Non lette prima
       if (a.isRead !== b.isRead) {
