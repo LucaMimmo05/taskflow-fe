@@ -8,6 +8,7 @@ import { NotificationToastService } from '../../services/notification-toast.serv
 import { TaskService } from '../../services/task.service';
 import { NotificationItemComponent } from '../../components/notification-item/notification-item';
 import { Notification } from '../../models/notification.model';
+import { Task } from '../../models/task.model';
 
 @Component({
   selector: 'app-notifications-page',
@@ -41,11 +42,9 @@ export class NotificationsPage implements OnInit, OnDestroy {
     this.loadNotifications();
 
     // Subscribe to unread count updates
-    this.notificationService.unreadCount$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((count) => {
-        this.unreadCount = count;
-      });
+    this.notificationService.unreadCount$.pipe(takeUntil(this.destroy$)).subscribe((count) => {
+      this.unreadCount = count;
+    });
 
     // Subscribe to notifications updates
     this.notificationService.notifications$
@@ -147,13 +146,13 @@ export class NotificationsPage implements OnInit, OnDestroy {
     if (notification.entityType === 'task' && notification.entityId) {
       // Per i task, dobbiamo recuperare il projectId prima di navigare
       this.taskService.getTaskById(notification.entityId).subscribe({
-        next: (task) => {
+        next: (task: Task) => {
           this.router.navigate(['/projects', task.projectId, 'tasks', task.id]);
         },
-        error: (error) => {
+        error: (error: any) => {
           console.error('Errore nel recuperare il task:', error);
           this.toastService.showError('Errore', 'Task non trovato');
-        }
+        },
       });
     } else if (notification.entityType === 'project' && notification.entityId) {
       this.router.navigate(['/projects', notification.entityId]);
@@ -175,7 +174,10 @@ export class NotificationsPage implements OnInit, OnDestroy {
       },
       error: (error) => {
         console.error('Errore nel marcare notifica come letta:', error);
-        this.toastService.showError('Errore', 'Non è stato possibile marcare la notifica come letta');
+        this.toastService.showError(
+          'Errore',
+          'Non è stato possibile marcare la notifica come letta'
+        );
       },
     });
   }
@@ -203,20 +205,16 @@ export class NotificationsPage implements OnInit, OnDestroy {
   }
 
   private showNewNotificationToast(notification: Notification): void {
-    const truncatedMessage = notification.message.substring(0, 80) + (notification.message.length > 80 ? '...' : '');
+    const truncatedMessage =
+      notification.message.substring(0, 80) + (notification.message.length > 80 ? '...' : '');
     const senderName = notification.senderName || 'Sistema';
 
-    this.toastService.showNotificationByType(
-      notification.type,
-      senderName,
-      truncatedMessage,
-      {
-        label: 'Vedi',
-        callback: () => {
-          this.onNotificationClick(notification);
-        },
-      }
-    );
+    this.toastService.showNotificationByType(notification.type, senderName, truncatedMessage, {
+      label: 'Vedi',
+      callback: () => {
+        this.onNotificationClick(notification);
+      },
+    });
   }
 
   get hasUnreadNotifications(): boolean {

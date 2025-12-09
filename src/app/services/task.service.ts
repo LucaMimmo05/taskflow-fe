@@ -54,6 +54,17 @@ export class TaskService {
   }
 
   /**
+   * Ottiene un singolo task per ID
+   * @param taskId ID del task
+   * @returns Observable con il task
+   */
+  getTaskById(taskId: string): Observable<Task> {
+    return this.http.get<Task>(`${this.apiUrl}/single/${taskId}`, {
+      headers: this.getHeaders(),
+    });
+  }
+
+  /**
    * Aggiorna un task esistente
    * @param taskId ID del task da aggiornare
    * @param updates Campi da aggiornare
