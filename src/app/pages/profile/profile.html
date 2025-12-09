@@ -43,16 +43,35 @@
         <!-- Profile Info Section -->
         <div class="profile-card">
             <h2>Informazioni Personali</h2>
+            
+            @if (error) {
+                <div class="error-message">{{ error }}</div>
+            }
+
             <div class="form-group">
-                <label for="displayName">Nome Completo</label>
-                <input type="text" id="displayName" [(ngModel)]="displayName" placeholder="Il tuo nome" />
+                <label for="displayName">Nome Completo *</label>
+                <input type="text" id="displayName" [(ngModel)]="displayName" placeholder="Il tuo nome" [disabled]="isSaving" />
             </div>
             <div class="form-group">
-                <label for="email">Email</label>
-                <input type="email" id="email" [(ngModel)]="email" placeholder="la-tua-email@example.com" />
+                <label for="email">Email *</label>
+                <input type="email" id="email" [(ngModel)]="email" placeholder="la-tua-email@example.com" [disabled]="isSaving" />
             </div>
-            <button class="save-btn" (click)="saveProfile()">Salva Modifiche</button>
+            <div class="form-group">
+                <label for="password">Password *</label>
+                <input type="password" id="password" [(ngModel)]="password" placeholder="Nuova password (min 8 caratteri)" [disabled]="isSaving" />
+            </div>
+            <div class="form-group">
+                <label for="confirmPassword">Conferma Password *</label>
+                <input type="password" id="confirmPassword" [(ngModel)]="confirmPassword" placeholder="Ripeti la password" [disabled]="isSaving" />
+            </div>
+            <button class="save-btn" (click)="saveProfile()" [disabled]="isSaving">
+                @if (isSaving) {
+                    <span class="spinner-small"></span>
+                    Salvataggio...
+                } @else {
+                    Salva Modifiche
+                }
+            </button>
         </div>
     </div>
 </div>
-

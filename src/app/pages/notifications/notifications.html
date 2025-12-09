@@ -1,0 +1,144 @@
+<div class="notifications-page">
+  <div class="notifications-header">
+    <div class="header-content">
+      <div class="header-title">
+        <h1>Notifiche</h1>
+        <span class="subtitle">{{ unreadCount > 0 ? unreadCount + ' nuova' + (unreadCount !== 1 ? 'e' : '') : 'Tutte lette' }}</span>
+      </div>
+      @if (unreadCount > 0) {
+        <button class="mark-all-btn" (click)="markAllAsRead()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+          Marca tutte come lette
+        </button>
+      }
+    </div>
+
+    <div class="search-box">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"></circle>
+        <path d="m21 21-4.35-4.35"></path>
+      </svg>
+      <input
+        type="text"
+        [(ngModel)]="searchQuery"
+        (input)="onSearchChange()"
+        placeholder="Cerca nelle notifiche..."
+        class="search-input"
+      />
+      @if (searchQuery) {
+        <button class="clear-btn" (click)="clearSearch()" aria-label="Cancella ricerca">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      }
+    </div>
+
+    <div class="filter-tabs">
+      <button
+        class="filter-tab"
+        [class.active]="selectedFilter === 'all'"
+        (click)="onFilterChange('all')"
+      >
+        Tutte
+      </button>
+      <button
+        class="filter-tab"
+        [class.active]="selectedFilter === 'unread'"
+        (click)="onFilterChange('unread')"
+      >
+        Non lette
+        @if (unreadNotifications.length > 0) {
+          <span class="badge">{{ unreadNotifications.length }}</span>
+        }
+      </button>
+      <button
+        class="filter-tab"
+        [class.active]="selectedFilter === 'read'"
+        (click)="onFilterChange('read')"
+      >
+        Lette
+      </button>
+    </div>
+  </div>
+
+  @if (loading) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Caricamento notifiche...</p>
+    </div>
+  }
+
+  @if (!loading && error) {
+    <div class="error-state">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="8" x2="12" y2="12"></line>
+        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+      </svg>
+      <p>{{ error }}</p>
+      <button class="retry-btn" (click)="loadNotifications()">Riprova</button>
+    </div>
+  }
+
+  @if (!loading && noNotifications) {
+    <div class="empty-state">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.3">
+        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+      </svg>
+      <p>Nessuna notifica</p>
+      <span class="subtitle">Non hai ancora ricevuto notifiche</span>
+    </div>
+  }
+
+  @if (!loading && filteredNotifications.length > 0) {
+    <div class="notifications-container">
+      @if (hasUnreadNotifications && selectedFilter !== 'read') {
+        <div class="notifications-section">
+          <h3 class="section-title">Non lette</h3>
+          <div class="notifications-list">
+            @for (notification of unreadNotifications; track notification.id) {
+              <app-notification-item
+                [notification]="notification"
+                (clicked)="onNotificationClick($event)"
+                (markAsRead)="onMarkAsRead($event)"
+              ></app-notification-item>
+            }
+          </div>
+        </div>
+      }
+
+      @if (hasReadNotifications && selectedFilter !== 'unread') {
+        <div class="notifications-section">
+          @if (selectedFilter === 'all') {
+            <h3 class="section-title">Lette</h3>
+          }
+          <div class="notifications-list">
+            @for (notification of readNotifications; track notification.id) {
+              <app-notification-item
+                [notification]="notification"
+                (clicked)="onNotificationClick($event)"
+                (markAsRead)="onMarkAsRead($event)"
+              ></app-notification-item>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  @if (!loading && filteredNotifications.length === 0 && !noNotifications) {
+    <div class="no-results-state">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" opacity="0.5">
+        <circle cx="11" cy="11" r="8"></circle>
+        <path d="m21 21-4.35-4.35"></path>
+      </svg>
+      <p>Nessun risultato</p>
+      <span class="subtitle">Prova a modificare i filtri o la ricerca</span>
+    </div>
+  }
+</div>

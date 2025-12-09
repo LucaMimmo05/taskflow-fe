@@ -2,9 +2,10 @@ import { Component, OnInit, OnDestroy, HostListener, ElementRef } from '@angular
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Subject, forkJoin, debounceTime, distinctUntilChanged } from 'rxjs';
+import { Subject, forkJoin, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
 import { TaskService } from '../../services/task.service';
 import { ProjectService } from '../../services/project.service';
+import { NotificationService } from '../../services/notification.service';
 import { Task } from '../../models/task.model';
 import { Project } from '../../models/project.model';
 
@@ -40,10 +41,10 @@ export class Topbar implements OnInit, OnDestroy {
   isSearching = false;
 
   // Notifications
-  notifications: Notification[] = [];
-  showNotifications = false;
+  unreadCount = 0;
 
   private searchSubject = new Subject<string>();
+  private destroy$ = new Subject<void>();
   private allTasks: Task[] = [];
   private allProjects: Project[] = [];
   private dataLoaded = false;
@@ -51,15 +52,29 @@ export class Topbar implements OnInit, OnDestroy {
   constructor(
     private taskService: TaskService,
     private projectService: ProjectService,
+    private notificationService: NotificationService,
     private router: Router,
     private elementRef: ElementRef
   ) {}
 
   ngOnInit(): void {
     // Setup debounced search
-    this.searchSubject.pipe(debounceTime(300), distinctUntilChanged()).subscribe((query) => {
+    this.searchSubject.pipe(debounceTime(300), distinctUntilChanged(), takeUntil(this.destroy$)).subscribe((query) => {
       this.performSearch(query);
     });
+
+    // Subscribe to unread count
+    this.notificationService.unreadCount$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((count) => {
+        this.unreadCount = count;
+      });
+
+    // Load initial unread count
+    this.notificationService.getUnreadCount().subscribe();
+
+    // Start polling for notifications
+    this.notificationService.startPolling(7000);
 
     // Preload data
     this.loadData();
@@ -67,13 +82,15 @@ export class Topbar implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.searchSubject.complete();
+    this.destroy$.next();
+    this.destroy$.complete();
+    this.notificationService.stopPolling();
   }
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: Event): void {
     if (!this.elementRef.nativeElement.contains(event.target)) {
       this.showResults = false;
-      this.showNotifications = false;
     }
   }
 
@@ -206,59 +223,8 @@ export class Topbar implements OnInit, OnDestroy {
     return this.getProjectColor(index >= 0 ? index : 0);
   }
 
-  // Notifications management
-  toggleNotifications(): void {
-    this.showNotifications = !this.showNotifications;
-  }
-
-  clearNotifications(): void {
-    this.notifications = [];
-    this.showNotifications = false;
-  }
-
-  formatTime(date: Date | string): string {
-    const now = new Date();
-    const notifDate = new Date(date);
-    const diffMs = now.getTime() - notifDate.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMs / 3600000);
-    const diffDays = Math.floor(diffMs / 86400000);
-
-    if (diffMins < 1) return 'Proprio ora';
-    if (diffMins < 60) return `${diffMins}m fa`;
-    if (diffHours < 24) return `${diffHours}h fa`;
-    if (diffDays < 7) return `${diffDays}d fa`;
-    
-    return notifDate.toLocaleDateString('it-IT');
-  }
-
-  // Add mock notifications for demo (will be replaced with backend data)
-  addMockNotifications(): void {
-    this.notifications = [
-      {
-        id: '1',
-        type: 'project',
-        title: 'Nuovo progetto condiviso',
-        message: 'Marco ha condiviso il progetto "TaskFlow" con te',
-        read: false,
-        createdAt: new Date(Date.now() - 5 * 60000), // 5 minutes ago
-      },
-      {
-        id: '2',
-        type: 'task',
-        title: 'Task assegnata',
-        message: 'Ti è stata assegnata la task "Implementare login"',
-        read: false,
-        createdAt: new Date(Date.now() - 30 * 60000), // 30 minutes ago
-      },
-      {
-        id: '3',
-        type: 'info',
-        title: 'Aggiornamento',
-        message: 'Sono disponibili nuove funzionalità nell\'app',
-        read: true,
-        createdAt: new Date(Date.now() - 2 * 3600000), // 2 hours ago
-      },
-    ];
+  // Navigate to notifications
+  goToNotifications(): void {
+    this.router.navigate(['/notifications']);
   }
 }

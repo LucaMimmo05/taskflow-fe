@@ -117,7 +117,9 @@
                         <div class="project-item" (click)="goToProject(project)">
                             <div class="project-info">
                                 <span class="project-name">{{ project.title }}</span>
-                                <span class="project-meta">{{ project.phases.length || 0 }} fasi</span>
+                                <span class="project-meta">
+                                    {{ project.taskCount }} task • {{ project.phases.length || 0 }} fasi
+                                </span>
                             </div>
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2">
@@ -193,35 +195,6 @@
                 </div>
             }
         </div>
-
-            <!-- Quick Actions -->
-            <div class="quick-actions">
-                <h3>Azioni Rapide</h3>
-                <div class="actions-grid">
-                    <button class="quick-action" (click)="goToProjects()">
-                        <div class="action-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <line x1="12" y1="5" x2="12" y2="19" />
-                                <line x1="5" y1="12" x2="19" y2="12" />
-                            </svg>
-                        </div>
-                        <span>Nuovo Progetto</span>
-                    </button>
-                    <button class="quick-action" (click)="goToCalendar()">
-                        <div class="action-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                                <line x1="16" y1="2" x2="16" y2="6" />
-                                <line x1="8" y1="2" x2="8" y2="6" />
-                                <line x1="3" y1="10" x2="21" y2="10" />
-                            </svg>
-                        </div>
-                        <span>Calendario</span>
-                    </button>
-                </div>
-            </div>
         </div>
     }
 </div>

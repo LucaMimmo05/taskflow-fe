@@ -20,6 +20,10 @@ interface RecentTask extends Task {
   projectTitle?: string;
 }
 
+interface ProjectWithTaskCount extends Project {
+  taskCount: number;
+}
+
 @Component({
   selector: 'app-home',
   standalone: true,
@@ -37,7 +41,7 @@ export class Home implements OnInit {
     overdueTasks: 0,
     upcomingTasks: 0,
   };
-  recentProjects: Project[] = [];
+  recentProjects: ProjectWithTaskCount[] = [];
   upcomingTasks: RecentTask[] = [];
   overdueTasks: RecentTask[] = [];
 
@@ -64,7 +68,6 @@ export class Home implements OnInit {
     this.projectService.getProjects().subscribe({
       next: (projects) => {
         this.stats.totalProjects = projects.length;
-        this.recentProjects = projects.slice(0, 4);
 
         if (projects.length === 0) {
           this.loading = false;
@@ -84,6 +87,12 @@ export class Home implements OnInit {
     
     forkJoin(taskRequests).subscribe({
       next: (results) => {
+        // Map projects with task count
+        this.recentProjects = projects.slice(0, 4).map((project, index) => ({
+          ...project,
+          taskCount: results[index]?.length || 0
+        }));
+
         const allTasks = this.mapTasksWithProjects(results, projects);
         this.processTaskStats(allTasks, projects);
         this.loading = false;

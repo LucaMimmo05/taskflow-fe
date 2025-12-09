@@ -4,6 +4,7 @@ import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { TaskService } from '../../services/task.service';
 import { ProjectService } from '../../services/project.service';
+import { AuthService } from '../../services/auth.service';
 import { Task } from '../../models/task.model';
 import { Project } from '../../models/project.model';
 import { forkJoin, Observable, catchError } from 'rxjs';
@@ -31,6 +32,7 @@ export class TasksPage implements OnInit {
   searchQuery = '';
   selectedProject = '';
   selectedStatus = '';
+  selectedLabel = '';
 
   // Colors for projects
   projectColors = ['#8b5cf6', '#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#ec4899', '#06b6d4'];
@@ -38,6 +40,7 @@ export class TasksPage implements OnInit {
   constructor(
     private taskService: TaskService,
     private projectService: ProjectService,
+    private authService: AuthService,
     private router: Router,
     private route: ActivatedRoute
   ) {}
@@ -55,6 +58,11 @@ export class TasksPage implements OnInit {
   loadData(): void {
     this.loading = true;
     this.error = null;
+    
+    // Get current user ID
+    const currentUser = this.authService.getCurrentUser();
+    const currentUserId = currentUser?.id;
+
     this.projectService.getProjects().subscribe({
       next: (projects) => {
         this.projects = projects;
@@ -83,11 +91,17 @@ export class TasksPage implements OnInit {
               const project = projects[index];
               if (Array.isArray(tasks)) {
                 tasks.forEach((task) => {
-                  this.allTasks.push({
-                    ...task,
-                    projectTitle: project.title,
-                    projectColor: this.projectColors[index % this.projectColors.length],
-                  });
+                  // Filter: show only tasks assigned to current user OR unassigned tasks
+                  const isAssignedToMe = currentUserId && task.assignees?.some(a => a.userId === currentUserId);
+                  const isUnassigned = !task.assignees || task.assignees.length === 0;
+                  
+                  if (isAssignedToMe || isUnassigned) {
+                    this.allTasks.push({
+                      ...task,
+                      projectTitle: project.title,
+                      projectColor: this.projectColors[index % this.projectColors.length],
+                    });
+                  }
                 });
               }
             });
@@ -132,6 +146,12 @@ export class TasksPage implements OnInit {
         return false;
       }
 
+      // Label filter
+      if (this.selectedLabel) {
+        const hasLabel = task.labels?.some(l => l.id === this.selectedLabel);
+        if (!hasLabel) return false;
+      }
+
       return true;
     });
   }
@@ -140,7 +160,20 @@ export class TasksPage implements OnInit {
     this.searchQuery = '';
     this.selectedProject = '';
     this.selectedStatus = '';
+    this.selectedLabel = '';
     this.filteredTasks = [...this.allTasks];
+  }
+
+  get allLabels(): { id: string; title: string; color: string }[] {
+    const labelMap = new Map<string, { id: string; title: string; color: string }>();
+    this.projects.forEach(p => {
+      p.labels?.forEach(l => {
+        if (!labelMap.has(l.id)) {
+          labelMap.set(l.id, l);
+        }
+      });
+    });
+    return Array.from(labelMap.values());
   }
 
   goToTask(task: TaskWithProject): void {

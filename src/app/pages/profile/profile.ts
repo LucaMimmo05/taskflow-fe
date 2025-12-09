@@ -4,7 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { UserService } from '../../services/user.service';
-import { UserResponse } from '../../models/user.model';
+import { NotificationToastService } from '../../services/notification-toast.service';
+import { UserResponse, UpdateUserRequest } from '../../models/user.model';
 
 @Component({
   selector: 'app-profile',
@@ -17,14 +18,19 @@ export class ProfilePage implements OnInit {
   user: UserResponse | null = null;
   displayName: string = '';
   email: string = '';
+  password: string = '';
+  confirmPassword: string = '';
   avatarUrl: string = '';
   selectedFile: File | null = null;
   previewUrl: string | null = null;
   isUploading = false;
+  isSaving = false;
+  error: string | null = null;
 
   constructor(
     private authService: AuthService,
     private userService: UserService,
+    private toastService: NotificationToastService,
     private router: Router
   ) {}
 
@@ -74,22 +80,88 @@ export class ProfilePage implements OnInit {
     }, 1000);
   }
 
+  validateForm(): boolean {
+    this.error = null;
+
+    if (!this.displayName.trim()) {
+      this.error = 'Il nome è obbligatorio';
+      return false;
+    }
+
+    if (this.displayName.length < 3 || this.displayName.length > 30) {
+      this.error = 'Il nome deve essere tra 3 e 30 caratteri';
+      return false;
+    }
+
+    if (!this.email.trim()) {
+      this.error = "L'email è obbligatoria";
+      return false;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(this.email)) {
+      this.error = 'Email non valida';
+      return false;
+    }
+
+    if (!this.password) {
+      this.error = 'La password è obbligatoria';
+      return false;
+    }
+
+    if (this.password.length < 8) {
+      this.error = 'La password deve essere di almeno 8 caratteri';
+      return false;
+    }
+
+    if (this.password !== this.confirmPassword) {
+      this.error = 'Le password non coincidono';
+      return false;
+    }
+
+    return true;
+  }
+
   saveProfile(): void {
     if (!this.user) return;
 
-    const updatedUser: Partial<UserResponse> = {
-      displayName: this.displayName,
-      email: this.email,
-      avatarUrl: this.avatarUrl,
+    if (!this.validateForm()) {
+      return;
+    }
+
+    this.isSaving = true;
+    this.error = null;
+
+    const updateRequest: UpdateUserRequest = {
+      displayName: this.displayName.trim(),
+      email: this.email.trim(),
+      password: this.password,
+      notifyOnDue: this.user.notifyOnDue
     };
 
-    // Qui chiameresti il servizio per aggiornare il profilo
-    // this.userService.updateUser(this.user.id!, updatedUser).subscribe(...)
-    
-    // Per ora aggiorniamo solo il localStorage
-    const updatedUserData = { ...this.user, ...updatedUser };
-    localStorage.setItem('user', JSON.stringify(updatedUserData));
-    this.user = updatedUserData as UserResponse;
+    this.userService.updateProfile(updateRequest).subscribe({
+      next: (updatedUser) => {
+        // Update local storage with new user data
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        this.user = updatedUser;
+        this.password = '';
+        this.confirmPassword = '';
+        this.isSaving = false;
+        this.toastService.showSuccess('Profilo aggiornato', 'Le tue informazioni sono state salvate con successo');
+      },
+      error: (err) => {
+        console.error('Errore aggiornamento profilo:', err);
+        this.isSaving = false;
+        if (err.error?.message) {
+          this.error = err.error.message;
+        } else if (err.error?.violations) {
+          this.error = err.error.violations.map((v: any) => v.message).join(', ');
+        } else {
+          this.error = 'Errore durante il salvataggio del profilo';
+        }
+        this.toastService.showError('Errore', this.error || 'Errore sconosciuto');
+      }
+    });
   }
 
   getInitials(): string {
@@ -102,4 +174,3 @@ export class ProfilePage implements OnInit {
       .slice(0, 2);
   }
 }
-

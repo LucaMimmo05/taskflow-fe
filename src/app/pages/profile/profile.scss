@@ -228,9 +228,42 @@
   }
 }
 
+.error-message {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #f87171;
+  padding: $spacing-3;
+  border-radius: $radius-lg;
+  margin-bottom: $spacing-4;
+  font-size: 0.875rem;
+
+  body.light & {
+    background: rgba(239, 68, 68, 0.1);
+    color: #dc2626;
+  }
+}
+
 .save-btn {
   @include accent-button;
   padding: $spacing-3 $spacing-6;
   font-size: 0.9375rem;
   margin-top: $spacing-2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-2;
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+}
+
+.spinner-small {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
 }
