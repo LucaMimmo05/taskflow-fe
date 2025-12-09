@@ -92,7 +92,7 @@
 }
 
 .back-btn {
-    display: flex;
+  display: flex;
   @include glass(0.15, 0.08);
   border: none;
   border-radius: $radius-lg;
@@ -691,14 +691,22 @@
 .modal {
   width: 480px;
   max-width: 90%;
-  @include glass(0.25, 0.12);
+
+  // Dark Glassmorphism
+  background: rgba(17, 24, 39, 0.9);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-radius: $radius-2xl;
   padding: $spacing-4;
   position: relative;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: $shadow-2xl;
+  color: $text-primary-dark;
 
   body.light & {
-    border-color: rgba(0, 0, 0, 0.15);
+    background: rgba(255, 255, 255, 0.9);
+    border-color: rgba(0, 0, 0, 0.1);
+    color: $text-primary-light;
   }
 
   &.modal-sm {
@@ -852,8 +860,14 @@
 .primary {
   @include accent-button;
 
-  span {
-    color: inherit;
+  &,
+  span,
+  svg {
+    color: white !important;
+  }
+
+  svg {
+    stroke: white !important;
   }
 }
 
@@ -915,21 +929,23 @@
 
 .add-collaborator-form {
   display: flex;
-  gap: $spacing-2;
-  margin-bottom: $spacing-4;
+  gap: $spacing-3;
+  align-items: stretch;
 
-  input {
+  .collaborator-input {
     flex: 1;
-    padding: $spacing-2 $spacing-3;
+    padding: $spacing-3 $spacing-4;
     border-radius: $radius-lg;
     @include glass(0.1, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.15);
     color: $text-primary-dark;
-    font-size: 0.875rem;
+    font-size: 0.9375rem;
+    background: rgba(255, 255, 255, 0.05);
 
     body.light & {
       border-color: rgba(0, 0, 0, 0.15);
       color: $text-primary-light;
+      background: rgba(255, 255, 255, 0.4);
     }
 
     &::placeholder {
@@ -943,11 +959,47 @@
     &:focus {
       outline: none;
       border-color: $color-accent;
+      box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.1);
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
     }
   }
 
-  button {
-    white-space: nowrap;
+  .add-collab-btn {
+    white-space: nowrap !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: $spacing-2 !important;
+    padding: $spacing-3 $spacing-4 !important;
+    font-size: 0.875rem !important;
+    line-height: 1.25rem !important;
+    color: white !important;
+    text-rendering: optimizeLegibility !important;
+    -webkit-font-smoothing: antialiased !important;
+
+    svg {
+      flex-shrink: 0;
+      stroke: white !important;
+    }
+  }
+}
+
+.form-section {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-2;
+}
+
+.form-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: $text-primary-dark;
+
+  body.light & {
+    color: $text-primary-light;
   }
 }
 
@@ -956,7 +1008,18 @@
   flex-direction: column;
   gap: $spacing-2;
   max-height: 300px;
+  min-height: 50px;
   overflow-y: auto;
+  width: 100%;
+  padding: $spacing-2;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: $radius-lg;
+
+  body.light & {
+    background: rgba(0, 0, 0, 0.03);
+    border-color: rgba(0, 0, 0, 0.05);
+  }
 }
 
 .collaborator-item {
@@ -965,10 +1028,24 @@
   gap: $spacing-3;
   padding: $spacing-3;
   border-radius: $radius-lg;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all $transition-duration-fast $transition-easing;
 
   body.light & {
-    background: rgba(0, 0, 0, 0.03);
+    background: rgba(255, 255, 255, 0.8);
+    border-color: rgba(0, 0, 0, 0.1);
+    box-shadow: $shadow-sm;
+  }
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.2);
+
+    body.light & {
+      background: #fff;
+      border-color: $color-accent;
+    }
   }
 }
 
@@ -1533,7 +1610,9 @@
 }
 
 // Button Text Visibility Reinforcement
-.primary, .danger, .btn-add {
+.primary,
+.danger,
+.btn-add {
   span {
     color: white !important;
   }
@@ -1542,7 +1621,7 @@
 .secondary {
   span {
     color: $color-accent !important;
-    
+
     body.light & {
       color: $color-accent !important;
     }
@@ -1563,21 +1642,21 @@
   max-height: 300px; // Increased height
   overflow-y: auto;
   padding-right: $spacing-2; // Space for scrollbar
-  
+
   // Custom Scrollbar
   &::-webkit-scrollbar {
     width: 6px;
   }
-  
+
   &::-webkit-scrollbar-track {
     background: rgba(255, 255, 255, 0.05);
     border-radius: $radius-full;
   }
-  
+
   &::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.2);
     border-radius: $radius-full;
-    
+
     &:hover {
       background: rgba(255, 255, 255, 0.3);
     }

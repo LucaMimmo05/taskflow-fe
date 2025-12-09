@@ -20,11 +20,12 @@ interface SearchResult {
 
 interface Notification {
   id: string;
-  type: 'project' | 'task' | 'info';
+  type: 'project' | 'task' | 'info' | 'success' | 'warning' | 'error';
   title: string;
   message: string;
   read: boolean;
   createdAt: Date;
+  time: string;
 }
 
 @Component({
@@ -41,7 +42,13 @@ export class Topbar implements OnInit, OnDestroy {
   isSearching = false;
 
   // Notifications
-  unreadCount = 0;
+  showNotificationsPopup = false;
+  notifications: Notification[] = [];
+  unreadNotificationsCount = 0;
+
+  get unreadNotifications(): Notification[] {
+    return this.notifications.filter((n) => !n.read);
+  }
 
   private searchSubject = new Subject<string>();
   private destroy$ = new Subject<void>();
@@ -59,16 +66,16 @@ export class Topbar implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     // Setup debounced search
-    this.searchSubject.pipe(debounceTime(300), distinctUntilChanged(), takeUntil(this.destroy$)).subscribe((query) => {
-      this.performSearch(query);
-    });
+    this.searchSubject
+      .pipe(debounceTime(300), distinctUntilChanged(), takeUntil(this.destroy$))
+      .subscribe((query) => {
+        this.performSearch(query);
+      });
 
     // Subscribe to unread count
-    this.notificationService.unreadCount$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((count) => {
-        this.unreadCount = count;
-      });
+    this.notificationService.unreadCount$.pipe(takeUntil(this.destroy$)).subscribe((count) => {
+      this.unreadNotificationsCount = count;
+    });
 
     // Load initial unread count
     this.notificationService.getUnreadCount().subscribe();
@@ -89,8 +96,10 @@ export class Topbar implements OnInit, OnDestroy {
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: Event): void {
-    if (!this.elementRef.nativeElement.contains(event.target)) {
+    const target = event.target as HTMLElement;
+    if (!this.elementRef.nativeElement.contains(target)) {
       this.showResults = false;
+      this.showNotificationsPopup = false;
     }
   }
 
@@ -223,8 +232,57 @@ export class Topbar implements OnInit, OnDestroy {
     return this.getProjectColor(index >= 0 ? index : 0);
   }
 
-  // Navigate to notifications
-  goToNotifications(): void {
-    this.router.navigate(['/notifications']);
+  // Notification management
+  toggleNotificationsPopup(event: Event): void {
+    event.stopPropagation();
+    this.showNotificationsPopup = !this.showNotificationsPopup;
+    this.loadNotifications();
+  }
+
+  loadNotifications(): void {
+    this.notificationService.getNotifications().subscribe({
+      next: (notifs) => {
+        this.notifications = notifs.map((n: any) => ({
+          id: n.id,
+          type: n.type || 'info',
+          title: n.title || 'Notifica',
+          message: n.message,
+          time: this.formatTime(n.createdAt),
+          read: n.isRead,
+          createdAt: n.createdAt,
+        }));
+        this.unreadNotificationsCount = this.notifications.filter((n) => !n.read).length;
+      },
+      error: (err) => {
+        console.error('Errore caricamento notifiche', err);
+      },
+    });
+  }
+
+  markAllAsRead(): void {
+    this.notificationService.markAllAsRead().subscribe({
+      next: () => {
+        this.loadNotifications(); // Ricarica le notifiche dopo averle segnate come lette
+      },
+      error: (err) => {
+        console.error('Errore nel segnare come lette', err);
+      },
+    });
+  }
+
+  private formatTime(date: any): string {
+    if (!date) return 'Ora';
+    const now = new Date();
+    const notifDate = new Date(date);
+    const diffMs = now.getTime() - notifDate.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return 'Ora';
+    if (diffMins < 60) return `${diffMins}m fa`;
+    if (diffHours < 24) return `${diffHours}h fa`;
+    if (diffDays < 7) return `${diffDays}g fa`;
+    return notifDate.toLocaleDateString();
   }
 }

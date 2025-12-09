@@ -4,10 +4,10 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ProjectService } from '../../../services/project.service';
 import { TaskService } from '../../../services/task.service';
-import { AuthService } from '../../../services/auth.service';
 import { Project, Phase, Label, Collaborator } from '../../../models/project.model';
 import { Task, CreateTaskRequest, UpdateTaskRequest } from '../../../models/task.model';
 import { UserService } from '../../../services/user.service';
+import { AuthService } from '../../../services/auth.service';
 import { OrderByPipe } from '../../../pipes/order-by.pipe';
 
 @Component({
@@ -24,9 +24,9 @@ export class ProjectDetailComponent implements OnInit {
   error: string | null = null;
   currentUserId: string | null = null;
 
-  // Task Filters
-  filterLabel: string = '';
-  filterAssignee: string = '';
+  // Filters
+  filterLabel: string | null = null;
+  filterAssignee: string | null = null;
 
   // Task Modal
   showTaskModal = false;
@@ -66,7 +66,7 @@ export class ProjectDetailComponent implements OnInit {
   // Phase Modal
   showPhaseModal = false;
   editingPhase: Phase | null = null;
-  phaseForm = { title: '' };
+  phaseTitle = '';
   savingPhase = false;
 
   // Delete Phase Confirmation
@@ -76,7 +76,8 @@ export class ProjectDetailComponent implements OnInit {
 
   // Labels Modal
   showLabelsModal = false;
-  labelForm = { title: '', color: '#6C63FF' };
+  labelTitle = '';
+  labelColor = '#6C63FF';
   savingLabel = false;
   presetColors = [
     '#6C63FF',
@@ -94,16 +95,14 @@ export class ProjectDetailComponent implements OnInit {
   // Edit Label Modal
   showEditLabelModal = false;
   editingLabel: Label | null = null;
-  editLabelForm = { title: '', color: '' };
+  // Use same properties for edit since we can reuse the logic or keep separate if we want 
+  // but simpler to just use labelTitle/Color for both if we manage state correctly.
+  // actually, let's keep it simple.
 
   // Delete Label Confirmation
   showDeleteLabelConfirm = false;
   labelToDelete: Label | null = null;
   deletingLabel = false;
-
-  // Leave Project
-  showLeaveConfirm = false;
-  leavingProject = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -112,12 +111,12 @@ export class ProjectDetailComponent implements OnInit {
     private taskService: TaskService,
     private userService: UserService,
     private authService: AuthService
-  ) {
-    const user = this.authService.getCurrentUser();
-    this.currentUserId = user?.id || null;
-  }
+  ) { }
 
   ngOnInit(): void {
+    const user = this.authService.getCurrentUser();
+    this.currentUserId = user ? user.id : null;
+
     // Subscribe to route params to handle project switching
     this.route.paramMap.subscribe((params) => {
       const projectId = params.get('id');
@@ -129,14 +128,6 @@ export class ProjectDetailComponent implements OnInit {
         this.loading = false;
       }
     });
-  }
-
-  removeFilter(filterType: 'label' | 'assignee'): void {
-    if (filterType === 'label') {
-      this.filterLabel = '';
-    } else if (filterType === 'assignee') {
-      this.filterAssignee = '';
-    }
   }
 
   resetState(): void {
@@ -153,12 +144,16 @@ export class ProjectDetailComponent implements OnInit {
     this.showLabelsModal = false;
     this.showEditLabelModal = false;
     this.showDeleteLabelConfirm = false;
+    this.labelTitle = '';
+    this.labelColor = '#6C63FF';
   }
 
   loadProject(projectId: string): void {
     this.loading = true;
     this.projectService.getProject(projectId).subscribe({
       next: (project) => {
+        console.log('Project loaded:', project);
+        console.log('Collaborators:', project.collaborators);
         this.project = project;
         this.loadTasks(projectId);
       },
@@ -186,6 +181,87 @@ export class ProjectDetailComponent implements OnInit {
 
   getTasksByPhase(phaseId: string): Task[] {
     return this.tasks.filter((t) => t.phaseId === phaseId);
+  }
+
+  getFilteredTasksByPhase(phaseId: string): Task[] {
+    return this.tasks.filter((t) => {
+      // Phase check
+      if (t.phaseId !== phaseId) return false;
+
+      // Label check
+      if (this.filterLabel && !t.labels.some((l) => l.id === this.filterLabel)) return false;
+
+      // Assignee check
+      if (this.filterAssignee) {
+        if (this.filterAssignee === 'unassigned') {
+          if (t.assignees.length > 0) return false;
+        } else {
+          if (!t.assignees.some((a) => a.userId === this.filterAssignee)) return false;
+        }
+      }
+
+      return true;
+    });
+  }
+
+  removeFilter(type: 'label' | 'assignee'): void {
+    if (type === 'label') this.filterLabel = null;
+    if (type === 'assignee') this.filterAssignee = null;
+  }
+
+  clearFilters(): void {
+    this.filterLabel = null;
+    this.filterAssignee = null;
+  }
+
+  isCurrentUserCreator(): boolean {
+    if (!this.project || !this.currentUserId) return false;
+    // Assuming creator is stored in project.creatorId or we check collaborators with role 'creator'
+    const creator = this.project.collaborators.find((c) => c.role === 'creator');
+    return creator?.userId === this.currentUserId;
+  }
+
+  canEditTask(task: Task): boolean {
+    // Implement logic: creator, admin, or assignee can edit?
+    // For now, simplify: if user is creator/admin or if task has no assignees or if user is assignee
+    if (!this.project || !this.currentUserId) return false;
+
+    // Project owner/admin can always edit
+    const myRole = this.project.collaborators.find(c => c.userId === this.currentUserId)?.role;
+    if (myRole === 'creator' || myRole === 'admin') return true;
+
+    // If I am assigned to the task
+    return task.assignees.some(a => a.userId === this.currentUserId);
+  }
+
+  confirmLeaveProject(): void {
+    if (!this.project) return;
+    if (confirm('Sei sicuro di voler lasciare questo progetto?')) {
+      this.projectService.removeCollaborator(this.project.id, { userId: this.currentUserId! })
+        .subscribe({
+          next: () => this.router.navigate(['/projects']),
+          error: (err) => {
+            console.error(err);
+            this.error = "Errore durante l'uscita dal progetto";
+          }
+        });
+    }
+  }
+
+  // Task Assignee Management implementation
+  isAssigneeSelected(userId: string): boolean {
+    return this.taskForm.assignees?.includes(userId) ?? false;
+  }
+
+  toggleAssignee(userId: string): void {
+    if (!this.taskForm.assignees) this.taskForm.assignees = [];
+
+    const index = this.taskForm.assignees.indexOf(userId);
+    if (index >= 0) {
+      this.taskForm.assignees.splice(index, 1);
+    } else {
+      this.taskForm.assignees.push(userId);
+    }
   }
 
   // Task CRUD Operations
@@ -495,14 +571,14 @@ export class ProjectDetailComponent implements OnInit {
       return;
     }
     this.editingPhase = null;
-    this.phaseForm.title = '';
+    this.phaseTitle = ''; // Create new object to ensure binding updates
     this.error = null;
     this.showPhaseModal = true;
   }
 
   openEditPhaseModal(phase: Phase): void {
     this.editingPhase = phase;
-    this.phaseForm.title = phase.title;
+    this.phaseTitle = phase.title;
     this.error = null;
     this.showPhaseModal = true;
   }
@@ -511,12 +587,12 @@ export class ProjectDetailComponent implements OnInit {
     if (this.savingPhase) return;
     this.showPhaseModal = false;
     this.editingPhase = null;
-    this.phaseForm.title = '';
+    this.phaseTitle = '';
   }
 
   submitPhase(): void {
     if (!this.project) return;
-    if (!this.phaseForm.title.trim()) {
+    if (!this.phaseTitle.trim()) {
       this.error = 'Il nome della fase è obbligatorio';
       return;
     }
@@ -527,7 +603,7 @@ export class ProjectDetailComponent implements OnInit {
     if (this.editingPhase) {
       // Update existing phase
       const updatedPhases = this.project.phases.map((p) =>
-        p.id === this.editingPhase!.id ? { ...p, title: this.phaseForm.title.trim() } : p
+        p.id === this.editingPhase!.id ? { ...p, title: this.phaseTitle.trim() } : p
       );
 
       this.projectService.updateProject(this.project.id, { phases: updatedPhases }).subscribe({
@@ -548,7 +624,7 @@ export class ProjectDetailComponent implements OnInit {
       const maxPosition = this.project.phases.reduce((max, p) => Math.max(max, p.position), 0);
       const newPhase: Phase = {
         id: crypto.randomUUID(),
-        title: this.phaseForm.title.trim(),
+        title: this.phaseTitle.trim(),
         position: maxPosition + 1,
       };
 
@@ -577,6 +653,7 @@ export class ProjectDetailComponent implements OnInit {
 
   cancelDeletePhase(): void {
     this.phaseToDelete = null;
+    this.showDeletePhaseConfirm = false;
   }
 
   movePhaseLeft(phase: Phase): void {
@@ -624,6 +701,7 @@ export class ProjectDetailComponent implements OnInit {
     if (!this.project) return -1;
     const sortedPhases = [...this.project.phases].sort((a, b) => a.position - b.position);
     return sortedPhases.findIndex((p) => p.id === phase.id);
+    this.showDeletePhaseConfirm = false;
   }
 
   deletePhase(): void {
@@ -659,7 +737,8 @@ export class ProjectDetailComponent implements OnInit {
 
   // Labels Management
   openLabelsModal(): void {
-    this.labelForm = { title: '', color: '#6C63FF' };
+    this.labelTitle = '';
+    this.labelColor = '#6C63FF';
     this.error = null;
     this.showLabelsModal = true;
   }
@@ -667,13 +746,18 @@ export class ProjectDetailComponent implements OnInit {
   closeLabelsModal(): void {
     if (this.savingLabel) return;
     this.showLabelsModal = false;
-    this.labelForm = { title: '', color: '#6C63FF' };
+    this.labelTitle = '';
+    this.labelColor = '#6C63FF';
     this.error = null;
   }
 
-  addLabel(): void {
+  addLabel(inputValue?: string): void {
     if (!this.project) return;
-    if (!this.labelForm.title.trim()) {
+
+    // Use input value if provided (bypassing potentially broken ngModel), otherwise fallback to bound property
+    const titleToUse = inputValue !== undefined ? inputValue : this.labelTitle;
+
+    if (!titleToUse.trim()) {
       this.error = "Il nome dell'etichetta è obbligatorio";
       return;
     }
@@ -683,8 +767,8 @@ export class ProjectDetailComponent implements OnInit {
 
     const newLabel: Label = {
       id: crypto.randomUUID(),
-      title: this.labelForm.title.trim(),
-      color: this.labelForm.color,
+      title: titleToUse.trim(),
+      color: this.labelColor,
     };
 
     const updatedLabels = [...this.project.labels, newLabel];
@@ -692,7 +776,8 @@ export class ProjectDetailComponent implements OnInit {
     this.projectService.updateProject(this.project.id, { labels: updatedLabels }).subscribe({
       next: (updated) => {
         this.project = updated;
-        this.labelForm = { title: '', color: '#6C63FF' };
+        this.labelTitle = '';
+        this.labelColor = '#6C63FF';
         this.savingLabel = false;
       },
       error: (err) => {
@@ -705,7 +790,8 @@ export class ProjectDetailComponent implements OnInit {
 
   openEditLabelModal(label: Label): void {
     this.editingLabel = label;
-    this.editLabelForm = { title: label.title, color: label.color };
+    this.labelTitle = label.title;
+    this.labelColor = label.color;
     this.error = null;
     this.showEditLabelModal = true;
   }
@@ -714,12 +800,13 @@ export class ProjectDetailComponent implements OnInit {
     if (this.savingLabel) return;
     this.showEditLabelModal = false;
     this.editingLabel = null;
-    this.editLabelForm = { title: '', color: '' };
+    this.labelTitle = '';
+    this.labelColor = '';
   }
 
   submitEditLabel(): void {
     if (!this.project || !this.editingLabel) return;
-    if (!this.editLabelForm.title.trim()) {
+    if (!this.labelTitle.trim()) {
       this.error = "Il nome dell'etichetta è obbligatorio";
       return;
     }
@@ -729,7 +816,7 @@ export class ProjectDetailComponent implements OnInit {
 
     const updatedLabels = this.project.labels.map((l) =>
       l.id === this.editingLabel!.id
-        ? { ...l, title: this.editLabelForm.title.trim(), color: this.editLabelForm.color }
+        ? { ...l, title: this.labelTitle.trim(), color: this.labelColor }
         : l
     );
 
@@ -763,15 +850,15 @@ export class ProjectDetailComponent implements OnInit {
 
     this.deletingLabel = true;
     const labelIdToDelete = this.labelToDelete.id;
-    const updatedLabels = this.project.labels.filter((l) => l.id !== labelIdToDelete);
+    const updatedLabels = this.project.labels.filter(l => l.id !== labelIdToDelete);
 
     this.projectService.updateProject(this.project.id, { labels: updatedLabels }).subscribe({
       next: (updated) => {
         this.project = updated;
         // Remove label from tasks locally
-        this.tasks = this.tasks.map((t) => ({
+        this.tasks = this.tasks.map(t => ({
           ...t,
-          labels: t.labels.filter((l) => l.id !== labelIdToDelete),
+          labels: t.labels ? t.labels.filter(l => l.id !== labelIdToDelete) : []
         }));
         this.deletingLabel = false;
         this.showDeleteLabelConfirm = false;
@@ -781,92 +868,7 @@ export class ProjectDetailComponent implements OnInit {
         this.error = 'Errore eliminazione etichetta';
         this.deletingLabel = false;
         console.error(err);
-      },
-    });
-  }
-
-  // Assignee Selection
-  toggleAssignee(userId: string): void {
-    if (!this.taskForm.assignees) {
-      this.taskForm.assignees = [];
-    }
-    const index = this.taskForm.assignees.indexOf(userId);
-    if (index >= 0) {
-      this.taskForm.assignees.splice(index, 1);
-    } else {
-      this.taskForm.assignees.push(userId);
-    }
-  }
-
-  isAssigneeSelected(userId: string): boolean {
-    return this.taskForm.assignees?.includes(userId) ?? false;
-  }
-
-  // Permission Check - can edit if unassigned or assigned to current user
-  canEditTask(task: Task): boolean {
-    if (!task.assignees || task.assignees.length === 0) {
-      return true; // Unassigned tasks can be edited by anyone
-    }
-    return task.assignees.some(a => a.userId === this.currentUserId);
-  }
-
-  // Current User Check
-  isCurrentUserCreator(): boolean {
-    if (!this.project || !this.currentUserId) return false;
-    const currentCollaborator = this.project.collaborators.find(c => c.userId === this.currentUserId);
-    return currentCollaborator?.role === 'creator';
-  }
-
-  // Task Filtering
-  getFilteredTasksByPhase(phaseId: string): Task[] {
-    let filtered = this.tasks.filter((t) => t.phaseId === phaseId);
-    
-    // Filter by label
-    if (this.filterLabel) {
-      filtered = filtered.filter(t => t.labels.some(l => l.id === this.filterLabel));
-    }
-    
-    // Filter by assignee
-    if (this.filterAssignee) {
-      if (this.filterAssignee === 'unassigned') {
-        filtered = filtered.filter(t => !t.assignees || t.assignees.length === 0);
-      } else {
-        filtered = filtered.filter(t => t.assignees.some(a => a.userId === this.filterAssignee));
       }
-    }
-    
-    return filtered;
-  }
-
-  clearFilters(): void {
-    this.filterLabel = '';
-    this.filterAssignee = '';
-  }
-
-  // Leave Project
-  confirmLeaveProject(): void {
-    this.showLeaveConfirm = true;
-  }
-
-  cancelLeaveProject(): void {
-    this.showLeaveConfirm = false;
-  }
-
-  leaveProject(): void {
-    if (!this.project || !this.currentUserId) return;
-
-    this.leavingProject = true;
-    this.projectService.removeCollaborator(this.project.id, { userId: this.currentUserId }).subscribe({
-      next: () => {
-        this.leavingProject = false;
-        this.showLeaveConfirm = false;
-        this.router.navigate(['/projects']);
-      },
-      error: (err) => {
-        this.error = err.error?.message || 'Errore durante l\'uscita dal progetto';
-        this.leavingProject = false;
-        console.error(err);
-      },
     });
   }
 }

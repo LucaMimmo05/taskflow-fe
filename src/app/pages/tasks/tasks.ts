@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -7,6 +7,8 @@ import { ProjectService } from '../../services/project.service';
 import { AuthService } from '../../services/auth.service';
 import { Task } from '../../models/task.model';
 import { Project } from '../../models/project.model';
+import { MatDialog, MatDialogModule, MatDialogConfig } from '@angular/material/dialog';
+import { TaskDetailDialogComponent } from '../../components/task-detail-dialog/task-detail-dialog.component';
 import { forkJoin, Observable, catchError } from 'rxjs';
 
 interface TaskWithProject extends Task {
@@ -17,7 +19,7 @@ interface TaskWithProject extends Task {
 @Component({
   selector: 'app-tasks-page',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [CommonModule, RouterModule, FormsModule, MatDialogModule],
   templateUrl: './tasks.html',
   styleUrl: './tasks.scss',
 })
@@ -42,8 +44,9 @@ export class TasksPage implements OnInit {
     private projectService: ProjectService,
     private authService: AuthService,
     private router: Router,
-    private route: ActivatedRoute
-  ) {}
+    private route: ActivatedRoute,
+    private dialog: MatDialog
+  ) { }
 
   ngOnInit(): void {
     // Check for search query param from topbar search
@@ -58,7 +61,7 @@ export class TasksPage implements OnInit {
   loadData(): void {
     this.loading = true;
     this.error = null;
-    
+
     // Get current user ID
     const currentUser = this.authService.getCurrentUser();
     const currentUserId = currentUser?.id;
@@ -75,7 +78,7 @@ export class TasksPage implements OnInit {
         }
 
         // Load tasks for all projects with error handling per project
-        const taskRequests = projects.map((p) => 
+        const taskRequests = projects.map((p) =>
           this.taskService.getTasksByProject(p.id).pipe(
             catchError(() => {
               console.warn(`Errore nel caricamento delle task per il progetto ${p.id}`);
@@ -94,7 +97,7 @@ export class TasksPage implements OnInit {
                   // Filter: show only tasks assigned to current user OR unassigned tasks
                   const isAssignedToMe = currentUserId && task.assignees?.some(a => a.userId === currentUserId);
                   const isUnassigned = !task.assignees || task.assignees.length === 0;
-                  
+
                   if (isAssignedToMe || isUnassigned) {
                     this.allTasks.push({
                       ...task,
@@ -177,7 +180,15 @@ export class TasksPage implements OnInit {
   }
 
   goToTask(task: TaskWithProject): void {
-    this.router.navigate(['/projects', task.projectId]);
+    const dialogConfig = new MatDialogConfig();
+    dialogConfig.width = '600px';
+    dialogConfig.maxWidth = '90vw';
+    dialogConfig.maxHeight = '90vh';
+    dialogConfig.data = task;
+    dialogConfig.autoFocus = false; // Prevent auto-focusing the first button
+    dialogConfig.panelClass = 'glass-dialog-panel';
+
+    this.dialog.open(TaskDetailDialogComponent, dialogConfig);
   }
 
   isOverdue(dueDate: string | undefined): boolean {
