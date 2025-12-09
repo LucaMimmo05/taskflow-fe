@@ -38,13 +38,23 @@
                     </svg>
                     <span class="collaborator-count">{{ project.collaborators.length }}</span>
                 </button>
-                <button class="action-btn" (click)="openEditProjectModal()" title="Modifica progetto">
+                <button *ngIf="!isCurrentUserCreator()" class="action-btn warning" (click)="confirmLeaveProject()"
+                    title="Lascia progetto">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                        <polyline points="16 17 21 12 16 7"></polyline>
+                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                    </svg>
+                </button>
+                <button *ngIf="isCurrentUserCreator()" class="action-btn" (click)="openEditProjectModal()"
+                    title="Modifica progetto">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
                         <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
                     </svg>
                 </button>
-                <button class="action-btn danger" (click)="confirmDeleteProject()" title="Elimina progetto">
+                <button *ngIf="isCurrentUserCreator()" class="action-btn danger" (click)="confirmDeleteProject()"
+                    title="Elimina progetto">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <polyline points="3 6 5 6 21 6" />
                         <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
@@ -59,7 +69,7 @@
         <div class="project-labels-section">
             <div class="labels-header">
                 <span class="labels-title">Etichette</span>
-                <button class="manage-btn" (click)="openLabelsModal()" title="Gestisci etichette">
+                <button class="manage-labels-btn" (click)="openLabelsModal()" title="Gestisci etichette">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                         stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="12" cy="12" r="1"></circle>
@@ -74,6 +84,27 @@
                 </span>
             </div>
             <span *ngIf="project.labels.length === 0" class="no-labels">Nessuna etichetta</span>
+        </div>
+
+        <!-- Filters Active State -->
+        <div class="filters-bar" *ngIf="filterLabel || filterAssignee">
+            <div class="active-filters">
+                <span class="filter-label">Filtri attivi:</span>
+                <span class="filter-badge" *ngIf="filterLabel">
+                    <span class="dot" [style.background-color]="getLabel(filterLabel)?.color"></span>
+                    {{ getLabel(filterLabel)?.title }}
+                    <button class="remove-filter" (click)="removeFilter('label')" title="Rimuovi filtro">×</button>
+                </span>
+                <span class="filter-badge" *ngIf="filterAssignee">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                    {{ filterAssignee === 'unassigned' ? 'Non assegnato' : 'Assegnatario' }}
+                    <button class="remove-filter" (click)="removeFilter('assignee')" title="Rimuovi filtro">×</button>
+                </span>
+                <button class="clear-filters-btn" (click)="clearFilters()">Rimuovi tutti</button>
+            </div>
         </div>
 
         <!-- Kanban Board -->
@@ -124,18 +155,28 @@
                     </div>
                 </div>
                 <div class="column-tasks">
-                    <div *ngFor="let task of getTasksByPhase(phase.id)" class="task-card"
-                        (click)="openEditTaskModal(task)">
+                    <div *ngFor="let task of getFilteredTasksByPhase(phase.id)" class="task-card"
+                        [class.locked]="!canEditTask(task)"
+                        (click)="canEditTask(task) ? openEditTaskModal(task) : null">
                         <div class="task-header">
                             <h4 class="task-title">{{ task.title }}</h4>
-                            <button class="delete-task-btn" (click)="confirmDeleteTask(task); $event.stopPropagation()"
-                                title="Elimina">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2">
-                                    <line x1="18" y1="6" x2="6" y2="18" />
-                                    <line x1="6" y1="6" x2="18" y2="18" />
-                                </svg>
-                            </button>
+                            <div class="task-header-actions">
+                                <span *ngIf="!canEditTask(task)" class="lock-icon" title="Assegnato ad altri">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                                    </svg>
+                                </span>
+                                <button *ngIf="canEditTask(task)" class="delete-task-btn"
+                                    (click)="confirmDeleteTask(task); $event.stopPropagation()" title="Elimina">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <line x1="18" y1="6" x2="6" y2="18" />
+                                        <line x1="6" y1="6" x2="18" y2="18" />
+                                    </svg>
+                                </button>
+                            </div>
                         </div>
                         <p *ngIf="task.description" class="task-description">{{ task.description }}</p>
                         <div class="task-labels" *ngIf="task.labels.length > 0">
@@ -165,7 +206,7 @@
                             </span>
                         </div>
                     </div>
-                    <div *ngIf="getTasksByPhase(phase.id).length === 0" class="empty-column">
+                    <div *ngIf="getFilteredTasksByPhase(phase.id).length === 0" class="empty-column">
                         <p>Nessuna task</p>
                     </div>
                 </div>
@@ -226,6 +267,18 @@
                             [style.background-color]="isLabelSelected(label.id) ? label.color : 'transparent'"
                             (click)="toggleLabel(label.id)">
                             {{ label.title }}
+                        </button>
+                    </div>
+                </div>
+
+                <div class="field" *ngIf="project && project.collaborators.length > 0">
+                    <span>Assegnatari</span>
+                    <div class="assignees-select">
+                        <button *ngFor="let collab of project.collaborators" class="assignee-option"
+                            [class.selected]="isAssigneeSelected(collab.userId)"
+                            (click)="toggleAssignee(collab.userId)">
+                            <span class="assignee-avatar-small">{{ collab.displayName.charAt(0).toUpperCase() }}</span>
+                            {{ collab.displayName }}
                         </button>
                     </div>
                 </div>
