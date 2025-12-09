@@ -1,13 +1,13 @@
-import { Component, OnInit, HostListener, ElementRef } from '@angular/core';
+import { Component, OnInit, ElementRef, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
-import { forkJoin } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
-import { ProjectService } from '../../services/project.service';
 import { TaskService } from '../../services/task.service';
+import { ProjectService } from '../../services/project.service';
 import { SidebarService } from '../../services/sidebar.service';
 import { UserResponse } from '../../models/user.model';
 import { Project } from '../../models/project.model';
+import { UserService } from '../../services/user.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -17,44 +17,52 @@ import { Project } from '../../models/project.model';
   styleUrl: './sidebar.scss',
 })
 export class Sidebar implements OnInit {
+  isCollapsed = false;
   user: UserResponse | null = null;
   projects: Project[] = [];
-  projectTaskCounts: Map<string, number> = new Map();
   loadingProjects = true;
-  isCollapsed = false;
   showSettingsPopup = false;
-  notificationsEnabled = true;
+  showNotificationsPopup = false;
+  notificationsEnabled = false;
+  
+  // Mock notifications
+  notifications = [
+    { id: 1, type: 'info', message: 'Nuovo commento su "Design System"', time: '5m fa', read: false },
+    { id: 2, type: 'warning', message: 'Task "Homepage" in scadenza domani', time: '2h fa', read: false },
+    { id: 3, type: 'success', message: 'Progetto "Mobile App" completato', time: '1g fa', read: true }
+  ];
+  unreadNotificationsCount = 2;
 
   menuItems = [
     { icon: 'home', label: 'Home', route: '/' },
     { icon: 'folder', label: 'Progetti', route: '/projects' },
-    { icon: 'check-square', label: 'Task', route: '/tasks' },
+    { icon: 'check-square', label: 'Le mie task', route: '/tasks' },
     { icon: 'calendar', label: 'Calendario', route: '/calendar' },
   ];
 
-  // Colori per i progetti
-  projectColors = ['#8b5cf6', '#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#ec4899', '#06b6d4'];
-
   constructor(
     private authService: AuthService,
-    private projectService: ProjectService,
     private taskService: TaskService,
+    private projectService: ProjectService,
     private router: Router,
     private sidebarService: SidebarService,
-    private elementRef: ElementRef
+    private elementRef: ElementRef,
+    private userService: UserService
   ) {}
 
   ngOnInit(): void {
     this.user = this.authService.getCurrentUser();
+    if (this.user) {
+      this.notificationsEnabled = this.user.notifyOnDue;
+    }
     this.loadProjects();
     this.sidebarService.isCollapsed$.subscribe((collapsed) => {
       this.isCollapsed = collapsed;
     });
-    // Carica lo stato delle notifiche
-    const savedNotifications = localStorage.getItem('notificationsEnabled');
-    if (savedNotifications !== null) {
-      this.notificationsEnabled = savedNotifications === 'true';
-    }
+  }
+
+  toggleCollapse(): void {
+    this.sidebarService.toggle();
   }
 
   loadProjects(): void {
@@ -62,93 +70,62 @@ export class Sidebar implements OnInit {
     this.projectService.getProjects().subscribe({
       next: (projects) => {
         this.projects = projects;
-        this.loadTaskCounts(projects);
         this.loadingProjects = false;
       },
-      error: () => {
+      error: (err) => {
+        console.error('Errore caricamento progetti', err);
+        this.projects = [];
         this.loadingProjects = false;
       },
     });
-  }
-
-  loadTaskCounts(projects: Project[]): void {
-    if (projects.length === 0) return;
-
-    const taskRequests = projects.map((project) => this.taskService.getTasksByProject(project.id));
-
-    forkJoin(taskRequests).subscribe({
-      next: (tasksArrays) => {
-        tasksArrays.forEach((tasks, index) => {
-          this.projectTaskCounts.set(projects[index].id, tasks.length);
-        });
-      },
-      error: () => {
-        // In caso di errore, non mostrare il conteggio
-      },
-    });
-  }
-
-  getTaskCount(projectId: string): number {
-    return this.projectTaskCounts.get(projectId) || 0;
   }
 
   getProjectColor(index: number): string {
-    return this.projectColors[index % this.projectColors.length];
+    const colors = ['#6C63FF', '#F43F5E', '#10B981', '#F59E0B', '#3B82F6'];
+    return colors[index % colors.length];
   }
 
-  goToProject(project: Project): void {
-    this.router.navigate(['/projects', project.id]);
-  }
-
-  goToAllProjects(): void {
-    this.router.navigate(['/projects']);
+  getTaskCount(projectId: string): number {
+    // In a real app, this would come from the backend with the project list
+    return Math.floor(Math.random() * 10);
   }
 
   getInitials(): string {
-    if (!this.user?.displayName) return 'U';
+    if (!this.user || !this.user.displayName) return 'U';
     return this.user.displayName
       .split(' ')
-      .map((name) => name[0])
+      .map((n) => n[0])
       .join('')
       .toUpperCase()
-      .slice(0, 2);
+      .substring(0, 2);
   }
 
-  toggleCollapse(): void {
-    this.sidebarService.toggle();
-  }
-
-  toggleSettingsPopup(event?: Event): void {
-    if (event) {
-      event.stopPropagation();
-    }
+  toggleSettingsPopup(event: Event): void {
+    event.stopPropagation();
     this.showSettingsPopup = !this.showSettingsPopup;
-  }
-
-  closeSettingsPopup(): void {
-    this.showSettingsPopup = false;
-  }
-
-  @HostListener('document:click', ['$event'])
-  onDocumentClick(event: Event): void {
-    if (!this.showSettingsPopup) {
-      return;
+    if (this.showSettingsPopup) {
+      this.showNotificationsPopup = false;
     }
+  }
 
-    const target = event.target as HTMLElement;
-    const clickedInsidePopup = target.closest('.settings-popup');
-    const clickedOnButton = target.closest('.user-menu-btn');
-
-    // Chiudi solo se il click è fuori dal popup e fuori dal bottone
-    if (!clickedInsidePopup && !clickedOnButton) {
+  toggleNotificationsPopup(event: Event): void {
+    event.stopPropagation();
+    this.showNotificationsPopup = !this.showNotificationsPopup;
+    if (this.showNotificationsPopup) {
       this.showSettingsPopup = false;
     }
   }
 
-  logout(): void {
-    this.authService.logout();
-    this.router.navigate(['/login']);
-    this.closeSettingsPopup();
+  closeSettingsPopup(): void {
+    this.showSettingsPopup = false;
+    this.showNotificationsPopup = false;
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    if (!this.elementRef.nativeElement.contains(event.target)) {
+      this.closeSettingsPopup();
+    }
   }
 
   goToProfile(): void {
@@ -158,7 +135,27 @@ export class Sidebar implements OnInit {
 
   toggleNotifications(): void {
     this.notificationsEnabled = !this.notificationsEnabled;
-    // Salva la preferenza nel localStorage
-    localStorage.setItem('notificationsEnabled', this.notificationsEnabled.toString());
+    this.userService.updateSettings({ notifyOnDue: this.notificationsEnabled }).subscribe({
+      next: () => {
+        if (this.user) {
+          this.user.notifyOnDue = this.notificationsEnabled;
+        }
+      },
+      error: (err) => {
+        console.error('Errore aggiornamento notifiche', err);
+        this.notificationsEnabled = !this.notificationsEnabled; // Revert
+      }
+    });
+  }
+
+  markAllAsRead(): void {
+    this.notifications = this.notifications.map(n => ({ ...n, read: true }));
+    this.unreadNotificationsCount = 0;
+  }
+
+  logout(): void {
+    this.authService.logout();
+    this.router.navigate(['/login']);
+    this.closeSettingsPopup();
   }
 }
