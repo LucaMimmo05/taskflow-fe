@@ -691,14 +691,22 @@
 .modal {
   width: 480px;
   max-width: 90%;
-  @include glass(0.25, 0.12);
+
+  // Dark Glassmorphism
+  background: rgba(17, 24, 39, 0.9);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-radius: $radius-2xl;
   padding: $spacing-4;
   position: relative;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: $shadow-2xl;
+  color: $text-primary-dark;
 
   body.light & {
-    border-color: rgba(0, 0, 0, 0.15);
+    background: rgba(255, 255, 255, 0.9);
+    border-color: rgba(0, 0, 0, 0.1);
+    color: $text-primary-light;
   }
 
   &.modal-sm {

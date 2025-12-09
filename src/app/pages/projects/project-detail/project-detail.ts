@@ -76,7 +76,8 @@ export class ProjectDetailComponent implements OnInit {
 
   // Labels Modal
   showLabelsModal = false;
-  labelForm = { title: '', color: '#6C63FF' };
+  labelTitle = '';
+  labelColor = '#6C63FF';
   savingLabel = false;
   presetColors = [
     '#6C63FF',
@@ -94,7 +95,9 @@ export class ProjectDetailComponent implements OnInit {
   // Edit Label Modal
   showEditLabelModal = false;
   editingLabel: Label | null = null;
-  editLabelForm = { title: '', color: '' };
+  // Use same properties for edit since we can reuse the logic or keep separate if we want 
+  // but simpler to just use labelTitle/Color for both if we manage state correctly.
+  // actually, let's keep it simple.
 
   // Delete Label Confirmation
   showDeleteLabelConfirm = false;
@@ -141,6 +144,8 @@ export class ProjectDetailComponent implements OnInit {
     this.showLabelsModal = false;
     this.showEditLabelModal = false;
     this.showDeleteLabelConfirm = false;
+    this.labelTitle = '';
+    this.labelColor = '#6C63FF';
   }
 
   loadProject(projectId: string): void {
@@ -732,7 +737,8 @@ export class ProjectDetailComponent implements OnInit {
 
   // Labels Management
   openLabelsModal(): void {
-    this.labelForm = { title: '', color: '#6C63FF' };
+    this.labelTitle = '';
+    this.labelColor = '#6C63FF';
     this.error = null;
     this.showLabelsModal = true;
   }
@@ -740,13 +746,18 @@ export class ProjectDetailComponent implements OnInit {
   closeLabelsModal(): void {
     if (this.savingLabel) return;
     this.showLabelsModal = false;
-    this.labelForm = { title: '', color: '#6C63FF' };
+    this.labelTitle = '';
+    this.labelColor = '#6C63FF';
     this.error = null;
   }
 
-  addLabel(): void {
+  addLabel(inputValue?: string): void {
     if (!this.project) return;
-    if (!this.labelForm.title.trim()) {
+
+    // Use input value if provided (bypassing potentially broken ngModel), otherwise fallback to bound property
+    const titleToUse = inputValue !== undefined ? inputValue : this.labelTitle;
+
+    if (!titleToUse.trim()) {
       this.error = "Il nome dell'etichetta è obbligatorio";
       return;
     }
@@ -756,8 +767,8 @@ export class ProjectDetailComponent implements OnInit {
 
     const newLabel: Label = {
       id: crypto.randomUUID(),
-      title: this.labelForm.title.trim(),
-      color: this.labelForm.color,
+      title: titleToUse.trim(),
+      color: this.labelColor,
     };
 
     const updatedLabels = [...this.project.labels, newLabel];
@@ -765,7 +776,8 @@ export class ProjectDetailComponent implements OnInit {
     this.projectService.updateProject(this.project.id, { labels: updatedLabels }).subscribe({
       next: (updated) => {
         this.project = updated;
-        this.labelForm = { title: '', color: '#6C63FF' };
+        this.labelTitle = '';
+        this.labelColor = '#6C63FF';
         this.savingLabel = false;
       },
       error: (err) => {
@@ -778,7 +790,8 @@ export class ProjectDetailComponent implements OnInit {
 
   openEditLabelModal(label: Label): void {
     this.editingLabel = label;
-    this.editLabelForm = { title: label.title, color: label.color };
+    this.labelTitle = label.title;
+    this.labelColor = label.color;
     this.error = null;
     this.showEditLabelModal = true;
   }
@@ -787,12 +800,13 @@ export class ProjectDetailComponent implements OnInit {
     if (this.savingLabel) return;
     this.showEditLabelModal = false;
     this.editingLabel = null;
-    this.editLabelForm = { title: '', color: '' };
+    this.labelTitle = '';
+    this.labelColor = '';
   }
 
   submitEditLabel(): void {
     if (!this.project || !this.editingLabel) return;
-    if (!this.editLabelForm.title.trim()) {
+    if (!this.labelTitle.trim()) {
       this.error = "Il nome dell'etichetta è obbligatorio";
       return;
     }
@@ -802,7 +816,7 @@ export class ProjectDetailComponent implements OnInit {
 
     const updatedLabels = this.project.labels.map((l) =>
       l.id === this.editingLabel!.id
-        ? { ...l, title: this.editLabelForm.title.trim(), color: this.editLabelForm.color }
+        ? { ...l, title: this.labelTitle.trim(), color: this.labelColor }
         : l
     );
 
@@ -836,15 +850,15 @@ export class ProjectDetailComponent implements OnInit {
 
     this.deletingLabel = true;
     const labelIdToDelete = this.labelToDelete.id;
-    const updatedLabels = this.project.labels.filter((l) => l.id !== labelIdToDelete);
+    const updatedLabels = this.project.labels.filter(l => l.id !== labelIdToDelete);
 
     this.projectService.updateProject(this.project.id, { labels: updatedLabels }).subscribe({
       next: (updated) => {
         this.project = updated;
         // Remove label from tasks locally
-        this.tasks = this.tasks.map((t) => ({
+        this.tasks = this.tasks.map(t => ({
           ...t,
-          labels: t.labels.filter((l) => l.id !== labelIdToDelete),
+          labels: t.labels ? t.labels.filter(l => l.id !== labelIdToDelete) : []
         }));
         this.deletingLabel = false;
         this.showDeleteLabelConfirm = false;
@@ -854,7 +868,7 @@ export class ProjectDetailComponent implements OnInit {
         this.error = 'Errore eliminazione etichetta';
         this.deletingLabel = false;
         console.error(err);
-      },
+      }
     });
   }
 }
