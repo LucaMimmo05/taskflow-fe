@@ -98,14 +98,12 @@
                 <div class="popup-header">
                     <h3>Notifiche</h3>
                     <div class="actions">
-                        @if (unreadNotifications.length > 0) {
                         <button class="mark-read-btn" (click)="markAllAsRead()">Segna tutte lette</button>
-                        }
                     </div>
                 </div>
                 <ul class="notification-list">
-                    @for (notif of unreadNotifications; track notif.id) {
-                    <li class="notification-item unread">
+                    @for (notif of notifications; track notif.id) {
+                    <li class="notification-item" [class.unread]="!notif.read">
                         <div class="notif-icon" [ngClass]="notif.type"></div>
                         <div class="notif-content">
                             <p>{{ notif.message }}</p>
@@ -113,9 +111,9 @@
                         </div>
                     </li>
                     }
-                    @if (unreadNotifications.length === 0) {
+                    @if (notifications.length === 0) {
                     <li class="empty-notifications">
-                        Nessuna notifica non letta
+                        Nessuna notifica
                     </li>
                     }
                 </ul>
